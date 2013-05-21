@@ -26,7 +26,7 @@ class PlayButton(Button):
         if self.mouseOver() == True:
             self.setSprite(self.sprPlayLit)
             if pygame.mouse.get_pressed() == (True, False, False):
-                game.gotoRoom("combat")
+                game.gotoRoom("street")
         if self.mouseOver() == False:
             self.setSprite(self.sprPlay)
 
@@ -50,46 +50,133 @@ class Background(pygmi.Object):
 
     def __init__(self,x,y,room):
         self.bgMainMenu = pygmi.Sprite("img/bg/title.png",0,0,800,600)
+        self.bgStreet = pygmi.Sprite("img/bg/street.png",0,0,800,600)
         self.setSolid(False)
         if room == mainmenu:
             super().__init__(self.bgMainMenu,x,y)
+        if room == street:
+            super().__init__(self.bgStreet,x,y)
 
 class Character(pygmi.Object):
 
     def __init__(self,x,y):
         self.xSpeed = 0
         self.ySpeed = 0
-        sprBoy = pygmi.Sprite("img/char/boy_akick",0,0,64,64)
-        sprBoy.setFrameTime(30)
-        super().__init__(sprBoy,x,y)
+        self.runModifier = 1
+        self.dominantX = 0
+        self.dominantY = 0
+        self.running = 0
+        self.listRunClock = [0, 0, 0, 0]
+        sprBoyIdle = pygmi.Sprite("img/char/boy_idle",0,0,64,64)
+        sprBoyIdle.setFrameTime(30)
+        sprBoyWalk = pygmi.Sprite("img/char/boy_walk",0,0,64,66)
+        sprBoyWalk.setFrameTime(8)
+        sprBoyRun = pygmi.Sprite("img/char/boy_run",0,0,64,70)
+        sprBoyRun.setFrameTime(5)
+        self.boy = {'idle':sprBoyIdle,'walk':sprBoyWalk,'run':sprBoyRun}
+        super().__init__(sprBoyIdle,x,y)
 
     def event_keyDown(self,key):
         if key == K_w:
-            self.ySpeed = -4
-        elif key == K_s:
-            self.ySpeed = 4
+            self.dominantY = 1
+            if self.listRunClock[0] > 0:
+                self.running = 1
+                self.runModifier = 1.5
+                self.listRunClock[0:3] = [0]*4
+        if key == K_s:
+            self.dominantY = 2
+            if self.listRunClock[1] > 0:
+                self.running = 1
+                self.runModifier = 1.5
+                self.listRunClock[0:3] = [0]*4
         if key == K_a:
-            self.xSpeed = -4
-        elif key == K_d:
-            self.xSpeed = 4
+            self.dominantX = 1
+            if self.listRunClock[2] > 0:
+                self.running = 1
+                self.runModifier = 1.5
+                self.listRunClock[0:3] = [0]*4
+        if key == K_d:
+            self.dominantX = 2
+            if self.listRunClock[3] > 0:
+                self.running = 1
+                self.runModifier = 1.5
+                self.listRunClock[0:3] = [0]*4
+        if key == K_w and self.dominantY != 2:
+            self.ySpeed = -2
+            if self.running == 1:
+                self.setSprite(self.boy['run'])
+                self.boy['run'].index = 0
+            elif self.running == 0:
+                self.setSprite(self.boy['walk'])
+                self.boy['walk'].index = 0
+        if key == K_s and self.dominantY != 1:
+            self.ySpeed = 2
+            if self.running == 1:
+                self.setSprite(self.boy['run'])
+                self.boy['run'].index = 0
+            elif self.running == 0:
+                self.setSprite(self.boy['walk'])
+                self.boy['walk'].index = 0
+        if key == K_a and self.dominantX != 2:
+            self.xSpeed = -3
+            for key, value in self.boy.items():
+                self.boy[key].setFlipped(1,0)
+            if self.running == 1:
+                self.setSprite(self.boy['run'])
+                self.boy['run'].index = 0
+            elif self.running == 0:
+                self.setSprite(self.boy['walk'])
+                self.boy['walk'].index = 0
+        if key == K_d and self.dominantX != 1:
+            self.xSpeed = 3
+            for key, value in self.boy.items():
+                self.boy[key].setFlipped(0,0)
+            if self.running == 1:
+                self.setSprite(self.boy['run'])
+                self.boy['run'].index = 0
+            elif self.running == 0:
+                self.setSprite(self.boy['walk'])
+                self.index = 0
+
+    def event_keyUp(self,key):
+        if key == K_w:
+            self.dominantY = 0
+            self.listRunClock[0] = 10
+        if key == K_s:
+            self.dominantY = 0
+            self.listRunClock[1] = 10
+        if key == K_a:
+            self.dominantX = 0
+            self.listRunClock[2] = 10
+        if key == K_d:
+            self.dominantX = 0
+            self.listRunClock[3] = 10
 
     def event_collision(self,other):
         print("Ouch!")
 
     def update(self):
         keys = pygame.key.get_pressed()
-        if not (keys[K_a] or keys[K_d]):
+        if not (keys[K_a] or keys[K_d] or keys[K_w] or keys[K_s]):
+            self.runModifier = 1
+        if self.dominantX == 0:
             self.xSpeed = 0
-        if not (keys[K_w] or keys[K_s]):
+        if self.dominantY == 0:
             self.ySpeed = 0
-
-        self.x += self.xSpeed
-        self.y += self.ySpeed
+        if self.xSpeed == 0 and self.ySpeed == 0:
+            self.setSprite(self.boy['idle'])
+            self.running = 0
+        for i in range(0,len(self.listRunClock)):
+            if self.listRunClock[i] > 0:
+                self.listRunClock[i] -= 1
+        self.x += self.xSpeed*self.runModifier
+        self.y += self.ySpeed*self.runModifier
 
 class Ball(pygmi.Object):
 
     def __repr__(self):
         return "ball"
+
     def __init__(self,x,y):
         random.seed()
         self.xSpeed = random.randint(0,4)
@@ -116,24 +203,24 @@ class Ball(pygmi.Object):
         if random.randint(0,100) > 99:
             self.destroy()
 
-
-
 if __name__ == '__main__':
     x_dim = 800
     y_dim = 600
     game = pygmi.Pygmi((x_dim,y_dim), "Test Game", 0)
-    oBoy = Character(100,100)
+    oBoy = Character(100,400)
     oPlay = PlayButton(x_dim-64,y_dim-60)
     oQuit = QuitButton(x_dim-64,y_dim-30)
     mainmenu = pygmi.Room("mainmenu",x_dim,y_dim)
-    combat = pygmi.Room("combat",x_dim,y_dim)
+    street = pygmi.Room("street",1200,y_dim)
     bgMainMenu = Background(0,0,mainmenu)
     mainmenu.addToRoom(bgMainMenu)
-    mainmenu.addToRoom(oBoy)
     mainmenu.addToRoom(oPlay)
     mainmenu.addToRoom(oQuit)
     game.addRoom(mainmenu)
-    game.addRoom(combat)
+    bgStreet = Background(0,0,street)
+    street.addToRoom(bgStreet)
+    street.addToRoom(oBoy)
+    game.addRoom(street)
     game.gotoRoom("mainmenu")
 
 
