@@ -3,7 +3,7 @@ Created on May 12, 2013
 
 @author: Catt
 '''
-import pygmi, pygame, os, sys
+import pygmi, pygame, os, sys,math
 from pygame.locals import *
 
 class Button(pygmi.Object):
@@ -280,36 +280,37 @@ class Character(pygmi.Object):
         elif self.shadow.sprite.flipx == 1:
             self.shadow.x = self.x-21
 
-class Ball(pygmi.Object):
-
-    def __repr__(self):
-        return "ball"
-
-    def __init__(self,x,y):
-        random.seed()
-        self.xSpeed = random.randint(0,4)
-        self.ySpeed = random.randint(0,4)
-        sprBall = pygmi.Sprite("img/enemies/apathol_spawn/apathol_spawn_03.png",-32,-32,64,64)
-        sprBall.setFrameTime(1)
-        super().__init__(sprBall,x,y)
-
-    def event_collision(self,other):
-
-        if(bool(random.getrandbits(1))):
-            self.xSpeed *= -1
-        else:
-            self.ySpeed *= -1
-
-    def update(self):
-        self.x += self.xSpeed
-        self.y += self.ySpeed
-        if self.x > x_dim or self.x < 0:
-            self.xSpeed *= -1
-        if self.y > y_dim or self.y < 0:
-            self.ySpeed *= -1
-
-        if random.randint(0,100) > 99:
-            self.destroy()
+#Retained for posterity, I suppose. -Ctt
+#class Ball(pygmi.Object):
+#
+#    def __repr__(self):
+#        return "ball"
+#
+#    def __init__(self,x,y):
+#        random.seed()
+#        self.xSpeed = random.randint(0,4)
+#        self.ySpeed = random.randint(0,4)
+#        sprBall = pygmi.Sprite("img/enemies/apathol_spawn/apathol_spawn_03.png",-32,-32,64,64)
+#        sprBall.setFrameTime(1)
+#        super().__init__(sprBall,x,y)
+#
+#    def event_collision(self,other):
+#
+#        if(bool(random.getrandbits(1))):
+#            self.xSpeed *= -1
+#        else:
+#            self.ySpeed *= -1
+#
+#    def update(self):
+#        self.x += self.xSpeed
+#        self.y += self.ySpeed
+#        if self.x > x_dim or self.x < 0:
+#            self.xSpeed *= -1
+#        if self.y > y_dim or self.y < 0:
+#            self.ySpeed *= -1
+#
+#        if random.randint(0,100) > 99:
+#            self.destroy()
 
 if __name__ == '__main__':
     x_dim = 800
@@ -337,6 +338,7 @@ if __name__ == '__main__':
     while(True):
         #update
         game.update()
-        print(oBoy.boy['jump'].index)
         #render
         game.render()
+        #paint
+        game.paint()
