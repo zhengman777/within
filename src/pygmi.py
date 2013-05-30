@@ -2,9 +2,10 @@
 Created on May 9, 2013
 
 @author: Catt
+@version: 1.000
 '''
 
-import pygame, os, sys, time, math
+import pygame, os, sys, math
 from pygame.locals import *
 
 
@@ -79,9 +80,9 @@ class Pygmi(object):
                 if event.type == MOUSEBUTTONUP:
                     self.activeRoom.event_mouseUp(event.button,event.pos)
                 if event.type == KEYDOWN:
-                    self.activeRoom.event_keyDown(event.key)
+                    self.activeRoom.event_keyPressed(event.key)
                 if event.type == KEYUP:
-                    self.activeRoom.event_keyUp(event.key)
+                    self.activeRoom.event_keyReleased(event.key)
             self.activeRoom.update()
         self.fpsClock.tick(self.fpsmax)
     
@@ -109,17 +110,41 @@ class Room(object):
         self.name = name
         self.w = w
         self.h = h
+        self.viewx = 0
+        self.viewy = 0
+        self.vieww = 0
+        self.viewh = 0
         self.lRender = []
         self.lUpdate = []
         self.coltree = Quadtree(0,Bbox(0,0,w,h))
         self.lCollision = []
+        self.renderCulling = False
         
     def addToRoom(self,obj):
         self.lUpdate.append(obj)
         if obj.isVisible():
             self.lRender.append(obj)
+            obj._visiblechange = False
         if obj.isSolid():
             self.lCollision.append(obj)
+            obj._solidchange = False
+    
+    def setView(self,x,y,w,h):
+        self.viewx = x
+        self.viewy = y
+        self.vieww = w
+        self.viewh = h
+    
+    def moveView(self,x,y):
+        self.viewx += x
+        self.viewy += y
+    
+    def zoomView(self,w,h):
+        self.vieww += w
+        self.viewh += h
+    
+    def setRenderCulling(self,isCulled):
+        self.renderCulling = isCulled
     
     def event_mouseDown(self,button,position):
         for obj in self.lUpdate:
@@ -129,13 +154,13 @@ class Room(object):
         for obj in self.lUpdate:
             obj.event_mouseUp(button,position)
     
-    def event_keyDown(self,key):
+    def event_keyPressed(self,key):
         for obj in self.lUpdate:
-            obj.event_keyDown(key)
+            obj.event_keyPressed(key)
     
-    def event_keyUp(self,key):
+    def event_keyReleased(self,key):
         for obj in self.lUpdate:
-            obj.event_keyUp(key)
+            obj.event_keyReleased(key)
     
     def collideAll(self):
         indexi = 0
@@ -156,9 +181,10 @@ class Room(object):
         index = 0
         for obj in self.lCollision:
             if not obj._destroyed:
-                self.coltree.insert(obj)
-                self.lCollision[index] = obj
-                index += 1
+                if obj.isSolid():
+                    self.coltree.insert(obj)
+                    self.lCollision[index] = obj
+                    index += 1
         del self.lCollision[index:]
         for obj in self.lCollision:
             lNearby = self.coltree.allNearby(obj)
@@ -171,21 +197,72 @@ class Room(object):
         index = 0
         for obj in self.lUpdate:
             if not obj._destroyed:
+                if obj._solidchange:
+                    obj._solidchange = False
+                    if obj.isSolid():
+                        self.lCollision.append(obj)
+                if obj._visiblechange:
+                    obj._visiblechange = False
+                    if obj.isVisible():
+                        self._renderInsert(obj)
                 self.lUpdate[index] = obj
                 index += 1
                 obj.update()
         del self.lUpdate[index:]
         self.collideTree()
+    
+    def _renderInsert(self,obj):
+        i = 0
+        while i < len(self.lRender):
+            if self.lRender[i].depth < obj.depth:
+                self.lRender.insert(i, obj)
+                return
+            i += 1
+        self.lRender.append(obj)    
             
     def render(self):
+        sort = False
         index = 0
         for obj in self.lRender:
             if not obj._destroyed:
-                self.lRender[index] = obj
-                index += 1
-                obj.render()
+                if obj.isVisible():
+                    self.lRender[index] = obj
+                    if obj._depthchange:
+                        sort = True
+                        obj._depthchange = False
+                    index += 1
+                    if self.renderCulling == False:
+                        obj.render(self.viewx,self.viewy,self.vieww,self.viewh)
+                    elif ((obj.x+obj.sprite.x+obj.sprite.w) - self.viewx > 0 and (obj.y+obj.sprite.y+obj.sprite.h) - self.viewy > 0 
+                          and (obj.x+obj.sprite.x) - self.viewx < self.w and (obj.y+obj.sprite.y) - self.viewy < self.h):
+                        obj.render(self.viewx,self.viewy,self.vieww,self.viewh)
         del self.lRender[index:]
+        if sort:
+            self.lRender = self._mergesort(self.lRender)
 
+    def _mergesort(self,unsorted):
+        if len(unsorted) <= 1:
+            return unsorted
+        mid = int(len(unsorted)/2)
+        left = self._mergesort(unsorted[:mid])
+        right = self._mergesort(unsorted[mid:])
+        return self._merge(left,right)
+    
+    def _merge(self,left,right):
+        result = []
+        i, j = 0, 0
+        while i < len(left) and j < len(right):
+            if left[i].depth >= right[j].depth:
+                result.append(left[i])
+                i += 1
+            else:
+                result.append(right[j])
+                j += 1
+        result += left[i:]
+        result += right[j:]
+        return result
+    
+    
 class SoundManager(object):
     '''
     The SoundManager takes a directory pathname and loads all sounds in that directory and its subdirectories.
@@ -231,6 +308,7 @@ class Sprite(object):
     def __init__(self,pathOrSurfaces,x,y,w,h):
         self.image = None
         self.images = []
+        self.alphas = []
         self.x = x;
         self.y = y;
         self.w = w;
@@ -260,8 +338,46 @@ class Sprite(object):
                 self.image = self.images[0]
             else:
                 raise Exception("(PyGMi Error) loadImage's parameter wasn't a filepath, directory, Pygame Surface, or sequence thereof.")
+        if len(self.images) < 2:
+            self.frameTime = 0
     
+    def loadAlphaMasks(self,pathOrSurfaces):
+        if isinstance(pathOrSurfaces,str) == False:
+            if hasattr(pathOrSurfaces,"__iter__"):
+                for item in pathOrSurfaces:
+                    self.loadAlphaMasks(item)
+            elif type(pathOrSurfaces) == pygame.Surface:
+                self.alphas.append(pathOrSurfaces)
+        else:
+            if os.path.isfile(pathOrSurfaces):
+                self.images.append(pygame.image.load(pathOrSurfaces))
+            elif os.path.isdir(pathOrSurfaces):
+                for f in os.listdir(pathOrSurfaces):
+                    self.alphas.append(pygame.image.load(pathOrSurfaces+"/"+f))
+            else:
+                raise Exception("(PyGMi Error) loadAlphaMasks' parameter wasn't a filepath, directory, Pygame Surface, or sequence thereof.")
+        for i,alpha in enumerate(self.alphas):
+            for j in range(0,alpha.get_width()):
+                for k in range(0,alpha.get_height()):
+                    c = alpha.get_at(j,k)
+                    value = math.floor((c.r + c.g + c.b)/3)
+                    c = self.images[i].get_at((j,k))
+                    c.a = value
+                    self.images[i].set_at((j,k),c)
+     
+    def setAlphaKey(self,color):
+        for image in self.images:
+            image.set_colorkey(color)
+    
+    def setAlpha(self,value):
+        for image in self.images:
+            image.set_alpha(value)
+            
     def setFlipped(self,flipped_x,flipped_y):
+        if self.flipx != flipped_x:
+            self.x = -(self.x + self.w)
+        if self.flipy != flipped_y:
+            self.y = -(self.y + self.h)
         self.flipx = flipped_x
         self.flipy = flipped_y
     
@@ -269,11 +385,14 @@ class Sprite(object):
         self.frameTime = frameTime
         
     def render(self):
-        self.image = self.images[math.floor(self.index/self.frameTime)]
-        if self.index < (len(self.images) * self.frameTime) - 1:
-            self.index += 1
+        if self.frameTime:
+            self.image = self.images[math.floor(self.index/self.frameTime)]
+            if self.index < (len(self.images) * self.frameTime) - 1:
+                self.index += 1
+            else:
+                self.index = 0
         else:
-            self.index = 0
+            self.image = self.images[self.index]
             
         
         
@@ -295,12 +414,16 @@ class Object(object):
         self.y = y;
         self.sprite = sprite
         if sprite:
-            self.bbox = Bbox(sprite.x,sprite.y,sprite.x+sprite.w,sprite.y+sprite.h)
+            self.bbox = Bbox(sprite.x,sprite.y,sprite.w,sprite.h)
         else:
             self.bbox = Bbox(0,0,0,0)
         self.solid = False
         self.visible = True
+        self.depth = 0;
         self._destroyed = False
+        self._depthchange = False
+        self._solidchange = False
+        self._visiblechange = False
 
     def setSprite(self,sprite):
         self.sprite = sprite
@@ -320,9 +443,15 @@ class Object(object):
         
     def setSolid(self,solid):
         self.solid = solid
+        self._solidchange = True
         
     def setVisible(self,visible):
         self.visible = visible
+        self._visiblechange = True
+    
+    def setDepth(self,depth):
+        self.depth = depth
+        self._depthchange = True
     
     def isSolid(self):
         return self.solid
@@ -340,10 +469,10 @@ class Object(object):
     def event_mouseUp(self,button,position):
         pass
     
-    def event_keyDown(self,key):
+    def event_keyPressed(self,key):
         pass
     
-    def event_keyUp(self,key):
+    def event_keyReleased(self,key):
         pass
             
     def event_create(self):
@@ -358,11 +487,12 @@ class Object(object):
     def update(self):
         pass
     
-    def render(self):
+    def render(self,viewx,viewy,vieww,viewh):
         if self.visible and self.sprite:
             self.sprite.render()
             img = pygame.transform.flip(self.sprite.image,self.sprite.flipx,self.sprite.flipy)
-            pygame.display.get_surface().blit(img,(self.x+self.sprite.x,self.y+self.sprite.y))
+            #pygame.transform.scale(img, (width, height))
+            pygame.display.get_surface().blit(img,(self.x + self.sprite.x-viewx,self.y + self.sprite.y-viewy))
 
 class Bbox(object):
     
