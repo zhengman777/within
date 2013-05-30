@@ -1,0 +1,31 @@
+PyGMi 1.000
+-----------
+
+Code-breakers:
+	
+	1) event_keyDown and event_keyUp changed to event_keyPressed and event_keyReleased, respectively.
+
+New features:
+
+	1) A Sprite's animation can be paused with Sprite.setFrameTime(0).
+		Note: A Sprite with 1 image will have FrameTime = 0 by default.
+	
+	2) Use Sprite.setAlpha(<0-255>) to set the alpha for all images of a sprite.
+	
+	3) Use Sprite.setAlphaKey(color) to set the colorkey for all images of a sprite.
+	
+	4) Use Sprite.loadAlphaMasks to add per-pixel alpha to images from a mask.
+		Note: This is slow. Avoid it by saving images with built-in per-pixel alpha.
+	
+	5) Use Object.setDepth(int) to set the rendering depth of an Object
+		Note: Objects with a small depth will be drawn over Objects with a large depth.
+	
+New behaviour:
+	
+	1) Sprites now flip over the axes drawn through their center.
+	
+	2) Obj.setVisible() and Obj.setSolid() now apply to objects which have already been added to a room.
+
+Bug fixes:
+
+	1) Collision detection now works properly with auto-generated bounding boxes.
