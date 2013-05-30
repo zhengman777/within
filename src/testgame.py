@@ -50,7 +50,6 @@ class Background(pygmi.Object):
     def __init__(self,x,y,room):
         self.bgMainMenu = pygmi.Sprite("img/bg/title.png",0,0,800,600)
         self.bgStreet = pygmi.Sprite("img/bg/street.png",0,0,800,600)
-        self.setSolid(False)
         if room == mainmenu:
             super().__init__(self.bgMainMenu,x,y)
         if room == street:
@@ -61,7 +60,6 @@ class Shadow(pygmi.Object):
     def __init__(self,x,y,size):
         self.size = size
         self.sprShadowM = pygmi.Sprite("img/fx/shadowM.png",0,0,64,30)
-        self.setSolid(False)
         self.sprShadowM.image.set_alpha(100)
         if self.size == "medium":
             super().__init__(self.sprShadowM,x,y)
@@ -73,6 +71,7 @@ class Character(pygmi.Object):
         self.xSpeed = 0
         self.ySpeed = 0
         self.z = y
+        self.hp = 30
         self.xDashSpeed = 0
         self.yDashSpeed = 0
         self.runModifier = 1
@@ -91,9 +90,10 @@ class Character(pygmi.Object):
         self.punch2Anim = 0
         self.kickAnim = 0
         self.datkAnim = 0
+        self.akickAnim = 0
         sprBoyIdle = pygmi.Sprite("img/char/boy_idle",-18,-64,30,64)
         sprBoyIdle.setFrameTime(30)
-        sprBoyWalk = pygmi.Sprite("img/char/boy_walk",-18,-66,64,66)
+        sprBoyWalk = pygmi.Sprite("img/char/boy_walk",-18,-66,30,66)
         sprBoyWalk.setFrameTime(8)
         sprBoyRun = pygmi.Sprite("img/char/boy_run",-22,-70,44,68)
         sprBoyRun.setFrameTime(5)
@@ -108,10 +108,13 @@ class Character(pygmi.Object):
         sprBoyJump = pygmi.Sprite("img/char/boy_jump",-18,-66,32,66)
         sprBoyJump.setFrameTime(2)
         sprBoyLand = pygmi.Sprite("img/char/boy_land.png",-16,-66,30,66)
+        sprBoyAkick = pygmi.Sprite("img/char/boy_akick",-12,-59,36,60)
+        sprBoyAkick.setFrameTime(2)
         self.boy = {'idle':sprBoyIdle,'walk':sprBoyWalk,'run':sprBoyRun,'punch1':sprBoyPunch1,
                     'punch2':sprBoyPunch2,'kick':sprBoyKick,'datk':sprBoyDatk,'jump':sprBoyJump,
-                    'land':sprBoyLand}
-        super().__init__(sprBoyIdle,x,y)
+                    'land':sprBoyLand,'akick':sprBoyAkick}
+        super().__init__(self.boy['idle'],x,y)
+        self.setSolid(True)
 
     def event_keyDown(self,key):
         if key == K_w:
@@ -186,6 +189,11 @@ class Character(pygmi.Object):
                         self.xSpeed = 0
                         self.ySpeed = 0
                         self.running = 0
+            elif self.y < self.z:
+                if self.attacking == 0:
+                    self.boy['akick'].index = 0
+                    self.akickAnim = 14
+                    print('hi')
         if key == K_k:
             if self.z == self.y and self.moving == 0 and self.attacking == 0:
                 self.boy['kick'].index = 0
@@ -219,7 +227,8 @@ class Character(pygmi.Object):
 
     def update(self):
         keys = pygame.key.get_pressed()
-        self.attacking = self.punch1Anim + self.punch2Anim + self.kickAnim + self.datkAnim
+        self.attacking = (self.punch1Anim + self.punch2Anim + self.kickAnim + self.datkAnim
+            + self.akickAnim)
         if self.datkAnim == 0:
             if not (keys[K_a] or keys[K_d] or keys[K_w] or keys[K_s]):
                 self.runModifier = 1
@@ -245,6 +254,9 @@ class Character(pygmi.Object):
         if self.kickAnim > 0:
             self.kickAnim -= 1
             self.setSprite(self.boy['kick'])
+        if self.akickAnim > 0:
+            self.akickAnim -= 1
+            self.setSprite(self.boy['akick'])
         if self.datkAnim > 6:
             self.datkAnim -= 1
             self.setSprite(self.boy['datk'])
@@ -260,14 +272,15 @@ class Character(pygmi.Object):
         if self.y < self.z:
             self.jumpSpeed -= self.gravity
             self. y -= self.jumpSpeed
-            if self.jumpSpeed >= 0:
+            if self.jumpSpeed >= 0 and self.attacking == 0:
                 self.setSprite(self.boy['jump'])
                 if self.boy['jump'].index == 5:
                     self.boy['jump'].index = 4
-            elif self.jumpSpeed < 0:
+            elif self.jumpSpeed < 0 and self.attacking == 0:
                 self.setSprite(self.boy['land'])
         if self.y > self.z:
             self.y = self.z
+            self.aKickAnim = 0
         if keys[K_SPACE] and self.jumpRelease == 0 and self.jumpSpeed > 0:
             self.jumpSpeed += .2
         self.x += self.xSpeed*self.runModifier
@@ -280,6 +293,17 @@ class Character(pygmi.Object):
         elif self.shadow.sprite.flipx == 1:
             self.shadow.x = self.x-21
 
+class Apathol(pygmi.Object):
+
+    def __init__(self,x,y):
+        sprApatholIdle = pygmi.Sprite("img/enemy/apathol_idle",-8,-38,16,18)
+        sprApatholIdle.setFrameTime(30)
+        self.apathol = {'idle':sprApatholIdle}
+        super().__init__(self.apathol['idle'],x,y)
+        self.setSolid(True)
+
+    def event_collision(self,other):
+        print("Ouch!")
 #Retained for posterity, I suppose. -Ctt
 #class Ball(pygmi.Object):
 #
@@ -318,6 +342,7 @@ if __name__ == '__main__':
     game = pygmi.Pygmi((x_dim,y_dim), "Test Game", 0)
     oShadow = Shadow(100-19,400-6,"medium")
     oBoy = Character(100,400,oShadow)
+    oApathol = Apathol(200,400)
     oPlay = PlayButton(x_dim-64,y_dim-60)
     oQuit = QuitButton(x_dim-64,y_dim-30)
     mainmenu = pygmi.Room("mainmenu",x_dim,y_dim)
@@ -331,6 +356,7 @@ if __name__ == '__main__':
     street.addToRoom(bgStreet)
     street.addToRoom(oShadow)
     street.addToRoom(oBoy)
+    street.addToRoom(oApathol)
     game.addRoom(street)
     game.gotoRoom("mainmenu")
 
