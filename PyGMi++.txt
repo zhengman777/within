@@ -1,4 +1,15 @@
 -----------
+PyGMi 1.011
+-----------
+
+New features:
+
+	1) Bbox.setFlipped(flipped_x,flipped_y) will flip the Bbox.
+		
+	2) Object.setFlipped(flipped_x,flipped_y) will flip both the Bbox and the Sprite of an Object.
+
+
+-----------
 PyGMi 1.001
 -----------
 

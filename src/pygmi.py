@@ -7,8 +7,6 @@ Created on May 9, 2013
 
 import pygame, os, sys, math
 from pygame.locals import *
-from collisiontree import CollisionTree
-
 
 class Tools(object):
     
@@ -458,6 +456,12 @@ class Object(object):
     def setDepth(self,depth):
         self.depth = depth
         self._depthchange = True
+        
+    def setFlipped(self,flipped_x,flipped_y):
+        if self.sprite:
+            self.sprite.setFlipped(flipped_x,flipped_y)
+        if self.bbox:
+            self.bbox.setFlipped(flipped_x, flipped_y)
     
     def isSolid(self):
         return self.solid
@@ -507,6 +511,8 @@ class Bbox(object):
         self.y = y
         self.w = width
         self.h = height
+        self.flipx = False
+        self.flipy = False
         
     def top(self):
         return self.y
@@ -519,6 +525,14 @@ class Bbox(object):
     
     def right(self):
         return self.x+self.w
+    
+    def setFlipped(self,flipped_x,flipped_y):
+        if self.flipx != flipped_x:
+            self.x = -(self.x + self.w)
+        if self.flipy != flipped_y:
+            self.y = -(self.y + self.h)
+        self.flipx = flipped_x
+        self.flipy = flipped_y
          
     
 class CollisionTree(object):
