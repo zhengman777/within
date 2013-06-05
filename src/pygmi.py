@@ -7,6 +7,7 @@ Created on May 9, 2013
 
 import pygame, os, sys, math
 from pygame.locals import *
+from collisiontree import CollisionTree
 
 
 class Tools(object):
@@ -39,7 +40,7 @@ class Tools(object):
         if not text:
             raise Exception("(PyGMi Error) Tools.makeText must take a string as its first parameter.")
         font = pygame.font.SysFont(fontname, size)
-        return font.render(text, 1, color)
+        return font.render(str(text), 1, color)
 
 class Pygmi(object):
     '''
@@ -116,7 +117,7 @@ class Room(object):
         self.viewh = 0
         self.lRender = []
         self.lUpdate = []
-        self.coltree = Quadtree(0,Bbox(0,0,w,h))
+        self.coltree = CollisionTree(0,Bbox(0,0,w,h))
         self.lCollision = []
         self.renderCulling = False
         
@@ -163,6 +164,7 @@ class Room(object):
             obj.event_keyReleased(key)
     
     def collideAll(self):
+        colcount = 0
         indexi = 0
         indexj = 1
         for obji in self.lCollision:
@@ -170,6 +172,7 @@ class Room(object):
                 self.lCollision[indexi] = obji
                 indexi += 1
                 for j in range(indexj,len(self.lCollision)):
+                    colcount += 1
                     if Tools.isCollision(obji,self.lCollision[j]):
                         obji.event_collision(self.lCollision[j])
                         self.lCollision[j].event_collision(obji)  
@@ -177,6 +180,7 @@ class Room(object):
         del self.lCollision[indexi:]
 
     def collideTree(self):
+        colcount = 0
         self.coltree.clear()
         index = 0
         for obj in self.lCollision:
@@ -189,9 +193,11 @@ class Room(object):
         for obj in self.lCollision:
             lNearby = self.coltree.allNearby(obj)
             for other in lNearby:
+                colcount += 1
                 if Tools.isCollision(obj,other):
                     obj.event_collision(other)
                     other.event_collision(obj)
+            self.coltree.remove(obj)
     
     def update(self):
         index = 0
@@ -515,7 +521,7 @@ class Bbox(object):
         return self.x+self.w
          
     
-class Quadtree(object):
+class CollisionTree(object):
     MAX_OBJECTS = 10
     MAX_LEVELS = 5
     
@@ -537,10 +543,13 @@ class Quadtree(object):
         sh = self.bounds.h/2
         x = self.bounds.x
         y = self.bounds.y
-        self.nodes[0] = Quadtree(self.level+1,Bbox(x+sw,y,sw,sh))
-        self.nodes[1] = Quadtree(self.level+1,Bbox(x,y,sw,sh))
-        self.nodes[2] = Quadtree(self.level+1,Bbox(x,y+sh,sw,sh))
-        self.nodes[3] = Quadtree(self.level+1,Bbox(x+sw,y+sh,sw,sh))
+        self.nodes[0] = CollisionTree(self.level+1,Bbox(x+sw,y,sw,sh))
+        self.nodes[1] = CollisionTree(self.level+1,Bbox(x,y,sw,sh))
+        self.nodes[2] = CollisionTree(self.level+1,Bbox(x,y+sh,sw,sh))
+        self.nodes[3] = CollisionTree(self.level+1,Bbox(x+sw,y+sh,sw,sh))
+        
+    def join(self):
+        pass
         
     def getQuadrant(self,obj):
         b = obj.bbox
@@ -593,3 +602,12 @@ class Quadtree(object):
             lNearby.extend(self.nodes[quad].allNearby(obj))
         lNearby.extend(self.objects)
         return lNearby
+    
+    def remove(self,obj):
+        if self.nodes[0]:
+            quad = self.getQuadrant(obj)
+            if quad != -1:
+                self.nodes[quad].remove(obj)
+                return
+        self.objects.remove(obj)
+        

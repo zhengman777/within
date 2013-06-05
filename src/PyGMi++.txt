@@ -1,9 +1,29 @@
+-----------
+PyGMi 1.001
+-----------
+
+Bug fixes:
+
+	1) Tools.makeText() will now accept any parameter which can be converted to
+		a string using str().
+		
+	2) The collision QuadTree has been reworked to test each collision only once,
+		doubling performance and erasing accidental, redundant calls of Object.event_collision().
+
+
+-----------
 PyGMi 1.000
 -----------
 
 Code-breakers:
 	
 	1) event_keyDown and event_keyUp changed to event_keyPressed and event_keyReleased, respectively.
+	
+New behaviour:
+	
+	1) Sprites now flip over the axes drawn through their center.
+	
+	2) Obj.setVisible() and Obj.setSolid() now apply to objects which have already been added to a room.
 
 New features:
 
@@ -20,12 +40,6 @@ New features:
 	5) Use Object.setDepth(int) to set the rendering depth of an Object
 		Note: Objects with a small depth will be drawn over Objects with a large depth.
 	
-New behaviour:
-	
-	1) Sprites now flip over the axes drawn through their center.
-	
-	2) Obj.setVisible() and Obj.setSolid() now apply to objects which have already been added to a room.
-
 Bug fixes:
 
 	1) Collision detection now works properly with auto-generated bounding boxes.
