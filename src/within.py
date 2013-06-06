@@ -3,67 +3,23 @@ Created on May 12, 2013
 
 @author: Catt
 '''
-import pygmi, pygame, os, sys,math
+import pygmi, pygame, os, sys, math
 from pygame.locals import *
-
-class Button(pygmi.Object):
-
-    def mouseOver(self):
-        self.mouseX, self.mouseY = pygame.mouse.get_pos()
-        if self.mouseX >= self.x and self.mouseX <= self.x+self.sprite.w and self.mouseY >= self.y and self.mouseY <= self.y+self.sprite.h:
-            return True
-        else:
-            return False
-
-class PlayButton(Button):
-
-    def __init__(self,x,y):
-        self.sprPlay = pygmi.Sprite("img/hud/play.png",0,0,64,30)
-        self.sprPlayLit = pygmi.Sprite("img/hud/playlit.png",0,0,64,30)
-        super().__init__(self.sprPlay,x,y)
-
-    def update(self):
-        if self.mouseOver() == True:
-            self.setSprite(self.sprPlayLit)
-            if pygame.mouse.get_pressed() == (True, False, False):
-                game.gotoRoom("street")
-        if self.mouseOver() == False:
-            self.setSprite(self.sprPlay)
-
-class QuitButton(Button):
-
-    def __init__(self,x,y):
-        self.sprQuit = pygmi.Sprite("img/hud/quit.png",0,0,64,30)
-        self.sprQuitLit = pygmi.Sprite("img/hud/quitlit.png",0,0,64,30)
-        super().__init__(self.sprQuit,x,y)
-
-    def update(self):
-        if oQuit.mouseOver() == True:
-            oQuit.setSprite(self.sprQuitLit)
-            if pygame.mouse.get_pressed() == (True, False, False):
-                game.quit()
-        if oQuit.mouseOver() == False:
-            oQuit.setSprite(self.sprQuit)
-
-class Background(pygmi.Object):
-
-    def __init__(self,x,y,room):
-        self.bgMainMenu = pygmi.Sprite("img/bg/title.png",0,0,800,600)
-        self.bgStreet = pygmi.Sprite("img/bg/street.png",0,0,800,600)
-        if room == mainmenu:
-            super().__init__(self.bgMainMenu,x,y)
-        if room == street:
-            super().__init__(self.bgStreet,x,y)
+from menu import *
+from enemy import *
 
 class HUD(pygmi.Object):
 
     def __init__(self,x,y,character):
         self.hp = str(character.hp)
+        self.character = character
         self.sprHP = pygmi.Sprite(pygmi.Tools.makeText(self.hp,None,None,None),0,0,0,0)
         super().__init__(self.sprHP,x,y)
 
     def update(self):
-        self.setSprite(pygmi.Sprite(pygmi.Tools.makeText(self.hp,None,None,None),0,0,0,0))
+        if self.character.hp != self.hp:
+            self.setSprite(pygmi.Sprite(pygmi.Tools.makeText(self.character.hp,None,None,None),0,0,0,0))
+            self.hp = self.character.hp
 
 class Shadow(pygmi.Object):
 
@@ -79,20 +35,39 @@ class Hitbox(pygmi.Object):
     def __init__(self,x,y,hitbox):
         self.power = 0
         self.hitbox = hitbox
-        htbxBoyPunch = pygmi.Sprite("img/htbx/zPunch.png",0,0,17,12)
+        htbxBoyPunch1 = pygmi.Sprite("img/htbx/zPunch1.png",0,0,17,14)
+        htbxBoyPunch2 = pygmi.Sprite("img/htbx/zPunch2.png",0,0,17,14)
         htbxBoyKick = pygmi.Sprite("img/htbx/zKick.png",0,0,21,12)
         htbxBoyDatk = pygmi.Sprite("img/htbx/zDatk.png",0,0,19,7)
-        self.htbxBoy = {'punch':htbxBoyPunch,'kick':htbxBoyKick,'datk':htbxBoyDatk}
-        if hitbox == "punch":
-            self.sprite = self.htbxBoy['punch']
+        htbxBoyAkick = pygmi.Sprite("img/htbx/zAkick.png",0,0,21,12)
+        self.htbxBoy = {'punch1':htbxBoyPunch1,'punch2':htbxBoyPunch2,'kick':htbxBoyKick,
+            'datk':htbxBoyDatk,'akick':htbxBoyAkick}
+        if hitbox == "punch1":
+            self.sprite = self.htbxBoy['punch1']
             self.countdown = 8
+        if hitbox == "punch2":
+            self.sprite = self.htbxBoy['punch2']
+            self.countdown = 8
+        if hitbox == "kick":
+            self.sprite = self.htbxBoy['kick']
+            self.countdown = 8
+        if hitbox == "datk":
+            self.sprite = self.htbxBoy['datk']
+            self.countdown = 21
+        if hitbox == 'akick':
+            self.sprite = self.htbxBoy['akick']
+            self.countdown = 10
         super().__init__(self.sprite,x,y)
         self.setSolid(True)
         #self.setVisible(False)
 
     def update(self):
-        if self.hitbox == "punch":
+        if self.hitbox == "punch1":
             self.power = 1
+        if self.hitbox == "punch2":
+            self.power = 1
+        if self.hitbox == "kick":
+            self.power = 2
         if self.countdown > 0:
             self.countdown -= 1
         if self.countdown == 0:
@@ -197,6 +172,7 @@ class Character(pygmi.Object):
                 self.boy['run'].index = 0
             for key, value in self.boy.items():
                 self.boy[key].setFlipped(1,0)
+            self.bbox.setFlipped(1,0)
         if key == K_d and self.dominantX != 1 and self.attacking == 0:
             self.xSpeed = 3
             self.x_scale = 1
@@ -206,6 +182,7 @@ class Character(pygmi.Object):
                 self.boy['run'].index = 0
             for key, value in self.boy.items():
                 self.boy[key].setFlipped(0,0)
+            self.bbox.setFlipped(1,0)
         self.moving = abs(self.xSpeed) + abs(self.ySpeed)
         if key == K_j:
             if self.z == self.y:
@@ -214,11 +191,13 @@ class Character(pygmi.Object):
                         self.boy['punch1'].index = 0
                         self.punch1Anim = 18
                         for e in enemyList:
-                            e.zPunchHit = 0
+                            e.zPunch1Hit = 0
                     if self.punch2Anim == 0 and self.punch1Anim <= 8 and self.punch1Anim > 0:
                         self.boy['punch2'].index = 0
                         self.punch2Anim = 24
                         self.punch1Anim = 0
+                        for e in enemyList:
+                            e.zPunch2Hit = 0
                 elif self.running == 1:
                     if self.attacking == 0:
                         self.boy['datk'].index = 0
@@ -228,15 +207,16 @@ class Character(pygmi.Object):
                         self.xSpeed = 0
                         self.ySpeed = 0
                         self.running = 0
+                elif self.moving != 0 and self.running == 0:
+                    if self.attacking == 0:
+                        self.boy['kick'].index = 0
+                        self.kickAnim = 24
+                        self.dominantY = 0
+                        self.dominantX = 0
             elif self.y < self.z:
                 if self.attacking == 0:
                     self.boy['akick'].index = 0
                     self.akickAnim = 14
-                    print('hi')
-        if key == K_k:
-            if self.z == self.y and self.moving == 0 and self.attacking == 0:
-                self.boy['kick'].index = 0
-                self.kickAnim = 24
         if key == K_SPACE:
             if self.y == self.z:
                 self.jumpRelease = 0
@@ -262,8 +242,7 @@ class Character(pygmi.Object):
             self.jumpRelease = 1
 
     def event_collision(self,other):
-        if other == Apathol:
-            print("ouch")
+        pass
 
     def update(self):
         keys = pygame.key.get_pressed()
@@ -286,15 +265,23 @@ class Character(pygmi.Object):
             elif self.running == 0 and self.moving > 0:
                 self.setSprite(self.boy['walk'])
         if self.punch1Anim == 18:
-            oHtbxPunch = Hitbox(self.x+(4*self.x_scale),self.y-44,"punch")
-            oHtbxPunch.sprite.setFlipped(self.sprite.flipx,0)
-            game.activeRoom.addToRoom(oHtbxPunch)
+            oHtbxPunch1 = Hitbox(self.x+(4*self.x_scale),self.y-44,"punch1")
+            oHtbxPunch1.setFlipped(self.sprite.flipx,0)
+            game.activeRoom.addToRoom(oHtbxPunch1)
         if self.punch1Anim > 0:
             self.punch1Anim -= 1
             self.setSprite(self.boy['punch1'])
+        if self.punch2Anim == 24:
+            oHtbxPunch2 = Hitbox(self.x+(4*self.x_scale),self.y-44,"punch2")
+            oHtbxPunch2.setFlipped(self.sprite.flipx,0)
+            game.activeRoom.addToRoom(oHtbxPunch2)
         if self.punch2Anim > 0:
             self.punch2Anim -= 1
             self.setSprite(self.boy['punch2'])
+        if self.kickAnim == 24:
+            oHtbxKick = Hitbox(self.x,self.y-32,"kick")
+            oHtbxKick.setFlipped(self.sprite.flipx,0)
+            game.activeRoom.addToRoom(oHtbxKick)
         if self.kickAnim > 0:
             self.kickAnim -= 1
             self.setSprite(self.boy['kick'])
@@ -337,67 +324,6 @@ class Character(pygmi.Object):
         elif self.sprite.flipx == 1:
             self.shadow.x = self.x-15
 
-
-class Enemy(pygmi.Object):
-
-    def __init__(self,sprite,x,y):
-        self.zPunchHit = 0
-        self.recoilAnim = 0
-        self.recoilSide = 0
-        self.recoilCounter = 0
-        self.recoilDistance = 0
-        enemyList.append(self)
-        super().__init__(sprite,x,y)
-
-    def event_collision(self,other):
-        if type(other) == Hitbox:
-            if self.zPunchHit == 0 and other.sprite == other.htbxBoy['punch']:
-                self.zPunchHit = 1
-                self.hp -= 1
-                self.recoilAnim = self.recoilTime
-                if other.x < self.x:
-                    self.recoilSide = 1
-                elif other.x >= self.x:
-                    self.recoilSide = -1
-            self.recoilCounter = 4
-            self.recoilDistance = other.power/self.weight
-            print('ouch')
-
-    def update(self):
-        if self.recoilAnim > 0:
-            self.recoilAnim -= 1
-        if self.recoilCounter > 0:
-            self.x += self.recoilDistance * self.recoilSide
-            self.recoilCounter -= 1
-        self.z = self.y
-        self.setDepth(-self.z)
-
-class Apathol(Enemy):
-
-    def __init__(self,x,y):
-        self.hp = 30
-        self.recoilTime = 12
-        self.weight = 1
-        sprIdle = pygmi.Sprite("img/enemy/apathol_idle",-8,-38,16,18)
-        sprIdle.setFrameTime(30)
-        sprRecoil = pygmi.Sprite("img/enemy/apathol_recoil",-24,-52,42,44)
-        sprRecoil.setFrameTime(4)
-        self.apathol = {'idle':sprIdle,'recoil':sprRecoil}
-        super().__init__(self.apathol['idle'],x,y)
-        self.setSolid(True)
-
-    def event_collision(self,other):
-        super().event_collision(other)
-
-    def update(self):
-        if self.recoilAnim > 0:
-            self.sprite = self.apathol['recoil']
-            self.apathol['recoil'].index = 0
-        else:
-            self.sprite = self.apathol['idle']
-        super().update()
-
-
 #Retained for posterity, I suppose. -Ctt
 #class Ball(pygmi.Object):
 #
@@ -438,17 +364,17 @@ if __name__ == '__main__':
     oBoy = Character(100,400,oShadow)
     oHUD = HUD(10,10,oBoy)
     enemyList = []
-    oApathol = Apathol(200,400)
-    oPlay = PlayButton(x_dim-64,y_dim-60)
+    oApathol = Apathol(200,400,enemyList)
+    oPlay = PlayButton(x_dim-64,y_dim-60,game)
     oQuit = QuitButton(x_dim-64,y_dim-30)
     mainmenu = pygmi.Room("mainmenu",x_dim,y_dim)
     street = pygmi.Room("street",1200,y_dim)
-    bgMainMenu = Background(0,0,mainmenu)
+    bgMainMenu = pygmi.Object(pygmi.Sprite("img/bg/title.png",0,0,800,600),0,0)
     mainmenu.addToRoom(bgMainMenu)
     mainmenu.addToRoom(oPlay)
     mainmenu.addToRoom(oQuit)
     game.addRoom(mainmenu)
-    bgStreet = Background(0,0,street)
+    bgStreet = pygmi.Object(pygmi.Sprite("img/bg/street.png",0,0,800,600),0,0)
     street.addToRoom(bgStreet)
     street.addToRoom(oShadow)
     street.addToRoom(oBoy)

@@ -9,24 +9,24 @@ import pygame, os, sys, math
 from pygame.locals import *
 
 class Tools(object):
-    
+
     C_BLACK = pygame.Color(0,0,0)
     C_WHITE = pygame.Color(255,255,255)
     C_YELLOW = pygame.Color(255,255,0)
     C_RED = pygame.Color(255,0,0)
     C_CKTRANSPARENT = pygame.Color(255,1,255)
-    
-    @staticmethod    
+
+    @staticmethod
     def isCollision(obj1,obj2):
         if obj1 == obj2:
             return False
         box1 = obj1.bbox
         box2 = obj2.bbox
-        return not(obj1.y + box1.bottom() < obj2.y + box2.top() 
-                    or obj1.y + box1.top() > obj2.y + box2.bottom() 
-                    or obj1.x + box1.left() > obj2.x + box2.right() 
+        return not(obj1.y + box1.bottom() < obj2.y + box2.top()
+                    or obj1.y + box1.top() > obj2.y + box2.bottom()
+                    or obj1.x + box1.left() > obj2.x + box2.right()
                     or obj1.x + box1.right() < obj2.x + box2.left())
-    
+
     @staticmethod
     def makeText(text,size,color,fontname):
         if not size:
@@ -46,7 +46,7 @@ class Pygmi(object):
     and create a window based on the parameters: Pygmi((w,h),caption,flags)
     Pygmi's main use is to store and control rooms.
     '''
-    
+
     clrBlack = pygame.Color(0,0,0)
 
     def __init__(self,dimensions,caption, flags):
@@ -64,11 +64,11 @@ class Pygmi(object):
     def createInstance(self,obj):
         self.activeRoom.addToRoom(obj)
         obj.event_create()
-    
+
     def quit(self):
         pygame.quit()
         sys.exit()
-        
+
     def update(self):
         if self.activeRoom:
             for event in pygame.event.get():
@@ -84,18 +84,18 @@ class Pygmi(object):
                     self.activeRoom.event_keyReleased(event.key)
             self.activeRoom.update()
         self.fpsClock.tick(self.fpsmax)
-    
+
     def render(self):
         self.window.fill(Pygmi.clrBlack)
         if self.activeRoom:
             self.activeRoom.render()
         if self._debug:
             self.window.blit(Tools.makeText("FPS:"+str(int(self.fpsClock.get_fps())),None,None,None),(0,0))
-    
+
     def paint(self):
         pygame.display.update()
-            
-        
+
+
 
 class Room(object):
     '''
@@ -104,7 +104,7 @@ class Room(object):
     it will call the update and render functions of all objects, as well as
     event functions.
     '''
-    
+
     def __init__(self,name,w,h):
         self.name = name
         self.w = w
@@ -118,7 +118,7 @@ class Room(object):
         self.coltree = CollisionTree(0,Bbox(0,0,w,h))
         self.lCollision = []
         self.renderCulling = False
-        
+
     def addToRoom(self,obj):
         self.lUpdate.append(obj)
         if obj.isVisible():
@@ -127,40 +127,40 @@ class Room(object):
         if obj.isSolid():
             self.lCollision.append(obj)
             obj._solidchange = False
-    
+
     def setView(self,x,y,w,h):
         self.viewx = x
         self.viewy = y
         self.vieww = w
         self.viewh = h
-    
+
     def moveView(self,x,y):
         self.viewx += x
         self.viewy += y
-    
+
     def zoomView(self,w,h):
         self.vieww += w
         self.viewh += h
-    
+
     def setRenderCulling(self,isCulled):
         self.renderCulling = isCulled
-    
+
     def event_mouseDown(self,button,position):
         for obj in self.lUpdate:
             obj.event_mouseDown(button,position)
-    
+
     def event_mouseUp(self,button,position):
         for obj in self.lUpdate:
             obj.event_mouseUp(button,position)
-    
+
     def event_keyPressed(self,key):
         for obj in self.lUpdate:
             obj.event_keyPressed(key)
-    
+
     def event_keyReleased(self,key):
         for obj in self.lUpdate:
             obj.event_keyReleased(key)
-    
+
     def collideAll(self):
         colcount = 0
         indexi = 0
@@ -173,7 +173,7 @@ class Room(object):
                     colcount += 1
                     if Tools.isCollision(obji,self.lCollision[j]):
                         obji.event_collision(self.lCollision[j])
-                        self.lCollision[j].event_collision(obji)  
+                        self.lCollision[j].event_collision(obji)
             indexj += 1
         del self.lCollision[indexi:]
 
@@ -196,7 +196,7 @@ class Room(object):
                     obj.event_collision(other)
                     other.event_collision(obj)
             self.coltree.remove(obj)
-    
+
     def update(self):
         index = 0
         for obj in self.lUpdate:
@@ -214,7 +214,7 @@ class Room(object):
                 obj.update()
         del self.lUpdate[index:]
         self.collideTree()
-    
+
     def _renderInsert(self,obj):
         i = 0
         while i < len(self.lRender):
@@ -222,8 +222,8 @@ class Room(object):
                 self.lRender.insert(i, obj)
                 return
             i += 1
-        self.lRender.append(obj)    
-            
+        self.lRender.append(obj)
+
     def render(self):
         sort = False
         index = 0
@@ -237,7 +237,7 @@ class Room(object):
                     index += 1
                     if self.renderCulling == False:
                         obj.render(self.viewx,self.viewy,self.vieww,self.viewh)
-                    elif ((obj.x+obj.sprite.x+obj.sprite.w) - self.viewx > 0 and (obj.y+obj.sprite.y+obj.sprite.h) - self.viewy > 0 
+                    elif ((obj.x+obj.sprite.x+obj.sprite.w) - self.viewx > 0 and (obj.y+obj.sprite.y+obj.sprite.h) - self.viewy > 0
                           and (obj.x+obj.sprite.x) - self.viewx < self.w and (obj.y+obj.sprite.y) - self.viewy < self.h):
                         obj.render(self.viewx,self.viewy,self.vieww,self.viewh)
         del self.lRender[index:]
@@ -251,7 +251,7 @@ class Room(object):
         left = self._mergesort(unsorted[:mid])
         right = self._mergesort(unsorted[mid:])
         return self._merge(left,right)
-    
+
     def _merge(self,left,right):
         result = []
         i, j = 0, 0
@@ -265,29 +265,29 @@ class Room(object):
         result += left[i:]
         result += right[j:]
         return result
-    
-    
+
+
 class SoundManager(object):
     '''
     The SoundManager takes a directory pathname and loads all sounds in that directory and its subdirectories.
     It stores sounds in a dictionary, allowing them to be accessed by their filename (without the extension).
     '''
-    
+
     def __init__(self):
         self.sounds = {}
-    
+
     def loadMusic(self,musicPath):
         if os.path.isfile(musicPath):
             pygame.mixer.music.load(musicPath)
         else:
             raise Exception("(PyGMi Error) loadMusic must take a filepath string of a sound as its parameter.")
-    
+
     def playMusic(self,loop):
         pygame.mixer.music.play(loop,0.0)
-    
+
     def stopMusic(self):
         pygame.mixer.music.stop()
-    
+
     def loadSounds(self,soundPath):
         if os.path.isfile(soundPath):
             self.sounds[os.path.basename(soundPath)] = pygame.image.load(soundPath)
@@ -296,19 +296,19 @@ class SoundManager(object):
                 self.loadSounds(soundPath+"/"+f)
         else:
             raise Exception("(PyGMi Error) loadSounds must take a filepath string of a sound or a directory as its parameter.")
-        
+
     def playSound(self,name):
         self.sounds[name].play()
-    
+
     def stopSound(self,name):
         self.sounds[name].stop()
-        
-class Sprite(object): 
+
+class Sprite(object):
     '''
     The Sprite tracks an image and its bounding box.
     It's relatively straight forward.
-    ''' 
-    
+    '''
+
     def __init__(self,pathOrSurfaces,x,y,w,h):
         self.image = None
         self.images = []
@@ -344,7 +344,7 @@ class Sprite(object):
                 raise Exception("(PyGMi Error) loadImage's parameter wasn't a filepath, directory, Pygame Surface, or sequence thereof.")
         if len(self.images) < 2:
             self.frameTime = 0
-    
+
     def loadAlphaMasks(self,pathOrSurfaces):
         if isinstance(pathOrSurfaces,str) == False:
             if hasattr(pathOrSurfaces,"__iter__"):
@@ -368,15 +368,15 @@ class Sprite(object):
                     c = self.images[i].get_at((j,k))
                     c.a = value
                     self.images[i].set_at((j,k),c)
-     
+
     def setAlphaKey(self,color):
         for image in self.images:
             image.set_colorkey(color)
-    
+
     def setAlpha(self,value):
         for image in self.images:
             image.set_alpha(value)
-            
+
     def setFlipped(self,flipped_x,flipped_y):
         if self.flipx != flipped_x:
             self.x = -(self.x + self.w)
@@ -384,10 +384,10 @@ class Sprite(object):
             self.y = -(self.y + self.h)
         self.flipx = flipped_x
         self.flipy = flipped_y
-    
+
     def setFrameTime(self,frameTime):
         self.frameTime = frameTime
-        
+
     def render(self):
         if self.frameTime:
             self.image = self.images[math.floor(self.index/self.frameTime)]
@@ -397,9 +397,9 @@ class Sprite(object):
                 self.index = 0
         else:
             self.image = self.images[self.index]
-            
-        
-        
+
+
+
 class Object(object):
     '''
     Object should not be used directly, but should be inherited by any class which controls
@@ -412,7 +412,7 @@ class Object(object):
        may be advantageous to create a list just for those objects)
     3) Add the event function to the Object class, but leave it empty since it will be overridden.
     '''
-    
+
     def __init__(self,sprite,x,y):
         self.x = x;
         self.y = y;
@@ -431,72 +431,72 @@ class Object(object):
 
     def setSprite(self,sprite):
         self.sprite = sprite
-    
+
     def setX(self,x):
         self.x = x;
-    
+
     def setY(self,y):
         self.y = y;
-    
+
     def setPosition(self,x,y):
         self.x = x;
         self.y = y;
-    
+
     def setBbox(self,x,y,w,h):
         self.bbox = Bbox(x,y,w,h)
-        
+
     def setSolid(self,solid):
         self.solid = solid
         self._solidchange = True
-        
+
     def setVisible(self,visible):
         self.visible = visible
         self._visiblechange = True
-    
+
     def setDepth(self,depth):
         self.depth = depth
         self._depthchange = True
-        
+
     def setFlipped(self,flipped_x,flipped_y):
         if self.sprite:
             self.sprite.setFlipped(flipped_x,flipped_y)
         if self.bbox:
             self.bbox.setFlipped(flipped_x, flipped_y)
-    
+
     def isSolid(self):
         return self.solid
-    
+
     def isVisible(self):
         return self.visible
-    
+
     def destroy(self):
         self.event_destroy()
         self._destroyed = True
-    
+
     def event_mouseDown(self,button,position):
         pass
-    
+
     def event_mouseUp(self,button,position):
         pass
-    
+
     def event_keyPressed(self,key):
         pass
-    
+
     def event_keyReleased(self,key):
         pass
-            
+
     def event_create(self):
         pass
-    
+
     def event_destroy(self):
         pass
-    
+
     def event_collision(self,other):
         pass
-    
+
     def update(self):
         pass
-    
+
     def render(self,viewx,viewy,vieww,viewh):
         if self.visible and self.sprite:
             self.sprite.render()
@@ -505,7 +505,7 @@ class Object(object):
             pygame.display.get_surface().blit(img,(self.x + self.sprite.x-viewx,self.y + self.sprite.y-viewy))
 
 class Bbox(object):
-    
+
     def __init__(self,x,y,width,height):
         self.x = x
         self.y = y
@@ -513,19 +513,19 @@ class Bbox(object):
         self.h = height
         self.flipx = False
         self.flipy = False
-        
+
     def top(self):
         return self.y
-    
+
     def bottom(self):
         return self.y+self.h
-    
+
     def left(self):
         return self.x
-    
+
     def right(self):
         return self.x+self.w
-    
+
     def setFlipped(self,flipped_x,flipped_y):
         if self.flipx != flipped_x:
             self.x = -(self.x + self.w)
@@ -533,25 +533,25 @@ class Bbox(object):
             self.y = -(self.y + self.h)
         self.flipx = flipped_x
         self.flipy = flipped_y
-         
-    
+
+
 class CollisionTree(object):
     MAX_OBJECTS = 10
     MAX_LEVELS = 5
-    
+
     def __init__(self,level,bounds):
         self.level = level
         self.bounds = bounds
         self.objects = []
         self.nodes = [None,None,None,None]
-        
+
     def clear(self):
         self.objects = []
         for node in self.nodes:
             if node:
                 node.clear()
                 node = None
-                
+
     def split(self):
         sw = self.bounds.w/2
         sh = self.bounds.h/2
@@ -561,10 +561,10 @@ class CollisionTree(object):
         self.nodes[1] = CollisionTree(self.level+1,Bbox(x,y,sw,sh))
         self.nodes[2] = CollisionTree(self.level+1,Bbox(x,y+sh,sw,sh))
         self.nodes[3] = CollisionTree(self.level+1,Bbox(x+sw,y+sh,sw,sh))
-        
+
     def join(self):
         pass
-        
+
     def getQuadrant(self,obj):
         b = obj.bbox
         quadrant = -1
@@ -584,18 +584,18 @@ class CollisionTree(object):
                 quadrant = 0
             elif bQuad:
                 quadrant = 3
-        
+
         return quadrant
-    
+
     def insert(self,obj):
         if self.nodes[0]:
             quad = self.getQuadrant(obj)
             if quad != -1:
                 self.nodes[quad].insert(obj)
                 return
-        
+
         self.objects.append(obj)
-        
+
         if len(self.objects) > self.MAX_OBJECTS and self.level < self.MAX_LEVELS:
             if not self.nodes[0]:
                 self.split()
@@ -608,7 +608,7 @@ class CollisionTree(object):
                     self.objects[index] = obj
                     index += 1
             del self.objects[index:]
-    
+
     def allNearby(self,obj):
         lNearby = []
         quad = self.getQuadrant(obj)
@@ -616,7 +616,7 @@ class CollisionTree(object):
             lNearby.extend(self.nodes[quad].allNearby(obj))
         lNearby.extend(self.objects)
         return lNearby
-    
+
     def remove(self,obj):
         if self.nodes[0]:
             quad = self.getQuadrant(obj)
@@ -624,4 +624,3 @@ class CollisionTree(object):
                 self.nodes[quad].remove(obj)
                 return
         self.objects.remove(obj)
-        
