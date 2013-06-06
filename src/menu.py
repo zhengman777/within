@@ -39,17 +39,17 @@ class PlayButton(Button):
 
     def update(self):
         super().update()
-        print(self.mouseOver())
 
 class QuitButton(Button):
 
-    def __init__(self,x,y):
+    def __init__(self,x,y,game):
         self.sprQuit = pygmi.Sprite("img/hud/quit.png",0,0,64,30)
         self.sprQuitLit = pygmi.Sprite("img/hud/quitlit.png",0,0,64,30)
+        self.game = game
         super().__init__(self.sprQuit,self.sprQuitLit,x,y)
 
     def event_pressed(self):
-        game.quit()
+        self.game.quit()
 
     def update(self):
         super().update()

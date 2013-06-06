@@ -1,12 +1,13 @@
 import pygmi, pygame, os, sys, math
 from pygame.locals import *
-from within import *
+from universal import *
 
 class Enemy(pygmi.Object):
 
     def __init__(self,sprite,x,y):
         self.zPunch1Hit = 0
         self.zPunch2Hit = 0
+        self.zKickHit = 0
         self.recoilAnim = 0
         self.recoilSide = 0
         self.recoilCounter = 0
@@ -16,22 +17,22 @@ class Enemy(pygmi.Object):
 
     def event_collision(self,other):
         if type(other) == Hitbox:
-            print(other)
+            self.recoilAnim = self.recoilTime
             if self.zPunch1Hit == 0 and other.sprite == other.htbxBoy['punch1']:
                 self.zPunch1Hit = 1
                 self.hp -= 1
-                self.recoilAnim = self.recoilTime
             if self.zPunch2Hit == 0 and other.sprite == other.htbxBoy['punch2']:
                 self.zPunch2Hit = 1
                 self.hp -= 1
-                self.recoilAnim = self.recoilTime
+            if self.zKickHit == 0 and other.sprite == other.htbxBoy['kick']:
+                self.zPunchKick = 1
+                self.hp -= 1
             if other.sprite.flipx == 0:
                 self.recoilSide = 1
             elif other.sprite.flipx == 1:
                 self.recoilSide = -1
             self.recoilCounter = 4
             self.recoilDistance = other.power/self.weight
-
 
     def update(self):
         if self.recoilAnim > 0:
@@ -44,11 +45,13 @@ class Enemy(pygmi.Object):
 
 class Apathol(Enemy):
 
-    def __init__(self,x,y,enemyList):
+    def __init__(self,x,y,enemyList,shadow):
         self.hp = 30
         self.recoilTime = 12
         self.weight = 1
         self.enemyList = enemyList
+        self.shadow = shadow
+        self.z = y
         sprIdle = pygmi.Sprite("img/enemy/apathol_idle",-8,-38,16,18)
         sprIdle.setFrameTime(30)
         sprRecoil = pygmi.Sprite("img/enemy/apathol_recoil",-24,-52,42,44)
@@ -67,4 +70,6 @@ class Apathol(Enemy):
             self.sprite = self.apathol['recoil']
         else:
             self.sprite = self.apathol['idle']
+        self.shadow.x = self.x-8
+        self.shadow.y = self.z
         super().update()
