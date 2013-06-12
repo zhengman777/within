@@ -1,10 +1,11 @@
 import pygmi, pygame, os, sys, math
 from pygame.locals import *
-from within import *
+from universal import Hitbox
 
 class Character(pygmi.Object):
 
-    def __init__(self,x,y,shadow):
+    def __init__(self,x,y,shadow,game):
+        self.game = game
         self.shadow = shadow
         self.xSpeed = 0
         self.ySpeed = 0
@@ -119,14 +120,10 @@ class Character(pygmi.Object):
                     if self.attacking == 0:
                         self.boy['punch1'].index = 0
                         self.punch1Anim = 18
-                        for e in within.enemyList:
-                            e.zPunch1Hit = 0
                     if self.punch2Anim == 0 and self.punch1Anim <= 8 and self.punch1Anim > 0:
                         self.boy['punch2'].index = 0
                         self.punch2Anim = 24
                         self.punch1Anim = 0
-                        for e in enemyList:
-                            e.zPunch2Hit = 0
                 elif self.running == 1:
                     if self.attacking == 0:
                         self.boy['datk'].index = 0
@@ -140,13 +137,13 @@ class Character(pygmi.Object):
                     if self.attacking == 0:
                         self.boy['kick'].index = 0
                         self.kickAnim = 24
-                        self.dominantY = 0
-                        self.dominantX = 0
+                        self.xSpeed = 0
+                        self.ySpeed = 0
             elif self.y < self.z:
                 if self.attacking == 0:
                     self.boy['akick'].index = 0
                     self.akickAnim = 14
-        if key == K_SPACE:
+        if key == K_SPACE and self.attacking == 0:
             if self.y == self.z:
                 self.jumpRelease = 0
                 self.jumpSpeed = self.maxJumpSpeed
@@ -221,35 +218,35 @@ class Character(pygmi.Object):
         if self.punch1Anim == 18:
             oHtbxPunch1 = Hitbox(self.x+4*self.x_scale,self.y-44,"punch1",self)
             oHtbxPunch1.setFlipped(self.sprite.flipx,0)
-            game.activeRoom.addToRoom(oHtbxPunch1)
+            self.game.activeRoom.addToRoom(oHtbxPunch1)
         if self.punch1Anim > 0:
             self.punch1Anim -= 1
             self.setSprite(self.boy['punch1'])
         if self.punch2Anim == 24:
             oHtbxPunch2 = Hitbox(self.x+4*self.x_scale,self.y-44,"punch2",self)
             oHtbxPunch2.setFlipped(self.sprite.flipx,0)
-            game.activeRoom.addToRoom(oHtbxPunch2)
+            self.game.activeRoom.addToRoom(oHtbxPunch2)
         if self.punch2Anim > 0:
             self.punch2Anim -= 1
             self.setSprite(self.boy['punch2'])
         if self.kickAnim == 24:
             oHtbxKick = Hitbox(self.x+4*self.x_scale,self.y-32,"kick",self)
             oHtbxKick.setFlipped(self.sprite.flipx,0)
-            game.activeRoom.addToRoom(oHtbxKick)
+            self.game.activeRoom.addToRoom(oHtbxKick)
         if self.kickAnim > 0:
             self.kickAnim -= 1
             self.setSprite(self.boy['kick'])
         if self.akickAnim == 14:
             oHtbxAkick = Hitbox(self.x+4*self.x_scale,self.y-30,"akick",self)
             oHtbxAkick.setFlipped(self.sprite.flipx,0)
-            game.activeRoom.addToRoom(oHtbxAkick)
+            self.game.activeRoom.addToRoom(oHtbxAkick)
         if self.akickAnim > 0:
             self.akickAnim -= 1
             self.setSprite(self.boy['akick'])
         if self.datkAnim == 21:
             oHtbxDatk = Hitbox(self.x,self.y-30,"datk",self)
             oHtbxDatk.setFlipped(self.sprite.flipx,0)
-            game.activeRoom.addToRoom(oHtbxDatk)
+            self.game.activeRoom.addToRoom(oHtbxDatk)
         if self.datkAnim > 6:
             self.datkAnim -= 1
             self.setSprite(self.boy['datk'])

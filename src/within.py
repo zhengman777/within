@@ -6,9 +6,6 @@ Created on May 12, 2013
 import pygmi, pygame, os, sys, math
 from pygame.locals import *
 from menu import *
-from enemy import *
-from universal import *
-from player import *
 from street import *
 
 if __name__ == '__main__':
@@ -23,7 +20,7 @@ if __name__ == '__main__':
     mainmenu.addToRoom(oPlay)
     mainmenu.addToRoom(oQuit)
     game.addRoom(mainmenu)
-    game.addRoom(Street())
+    game.addRoom(Street(game))
     game.gotoRoom("mainmenu")
 
 
