@@ -1,10 +1,11 @@
 '''
 Created: 2013-05-09
-Updated: 2013-06-12
+Updated: 2013-06-18
 @author: Catt
-@version: 2.000
+@version: 2.010
 '''
 
+from collections import OrderedDict
 import pygame, os, sys, math
 from pygame.locals import *
 
@@ -15,7 +16,7 @@ class Tools(object):
     C_YELLOW = pygame.Color(255,255,0)
     C_RED = pygame.Color(255,0,0)
     C_CKTRANSPARENT = pygame.Color(255,1,255)
-    
+
     @staticmethod    
     def isCollision(obj1,obj2):
         if obj1 == obj2:
@@ -59,6 +60,9 @@ class Pygmi(object):
         self.window = pygame.display.set_mode(dimensions,flags)
         self.assets = AssetManager()
         self.fpsClock = pygame.time.Clock()
+        self.keys = {}
+        for i in range(0,133):
+            self.keys[i] = False
     
     def getAssetManager(self):
         return self.assets
@@ -82,6 +86,7 @@ class Pygmi(object):
         obj.assets = self.assets
         obj.window = self.window
         obj.event_create()
+        return obj
     
     def quit(self):
         pygame.quit()
@@ -97,12 +102,14 @@ class Pygmi(object):
                 if event.type == MOUSEBUTTONUP:
                     self.activeRoom._event_mouseReleased(event.button,event.pos)
                 if event.type == KEYDOWN:
+                    self.keys[event.key] = True
                     self.activeRoom._event_keyPressed(event.key)
                 if event.type == KEYUP:
+                    self.keys[event.key] = False
                     self.activeRoom._event_keyReleased(event.key)
                     if event.key == K_ESCAPE:
                         self.quit()
-            self.activeRoom.update()
+            self.activeRoom._update()
         self.fpsClock.tick(self.fpsmax)
     
     def render(self):
@@ -173,14 +180,14 @@ class Room(object):
         self.renderCulling = isCulled
     
     def _event_mousePressed(self,button,position):
-        self.event_mousePressed(button,position)
+        self.event_mousePressed(button,(position[0]+self.viewx,position[1]+self.viewy))
         for obj in self.lUpdate:
-            obj.event_mousePressed(button,position)
+            obj.event_mousePressed(button,(position[0]+self.viewx,position[1]+self.viewy))
     
     def _event_mouseReleased(self,button,position):
-        self.event_mouseReleased(button,position)
+        self.event_mouseReleased(button,(position[0]+self.viewx,position[1]+self.viewy))
         for obj in self.lUpdate:
-            obj.event_mouseReleased(button,position)
+            obj.event_mouseReleased(button,(position[0]+self.viewx,position[1]+self.viewy))
     
     def _event_keyPressed(self,key):
         self.event_keyPressed(key)
@@ -249,6 +256,10 @@ class Room(object):
             self.coltree.remove(obj)
     
     def update(self):
+        pass
+    
+    def _update(self):
+        self.update()
         index = 0
         for obj in self.lUpdate:
             if not obj._destroyed:
@@ -329,20 +340,27 @@ class AssetManager(object):
     '''
     
     def __init__(self):
-        self.sounds = {}
-        self.images = {}
-        self.loadImages("img")
+        self.sounds = OrderedDict()
+        self.images = OrderedDict()
+        self.images = self.loadImages("img")
         self.loadSounds("snd")
         
-    def loadImages(self,imagePath):
+    def loadImages(self,imagePath,dct = OrderedDict()):
         if os.path.isfile(imagePath):
             img = pygame.image.load(imagePath)
-            self.images[os.path.basename(imagePath)] = img.convert_alpha()
+            dct[os.path.basename(imagePath)] = img.convert_alpha()
+            return dct
         elif os.path.isdir(imagePath):
-            for f in os.listdir(imagePath):
-                self.loadImages(imagePath+"/"+f)
+            if imagePath != "img":
+                dct[os.path.basename(imagePath)] = OrderedDict()
+                for f in os.listdir(imagePath):
+                    self.loadImages(imagePath+"/"+f,dct[os.path.basename(imagePath)])
+            else:
+                for f in os.listdir(imagePath):
+                    self.loadImages(imagePath+"/"+f,dct)
+            return dct
         else:
-            raise Exception("(PyGMi Error) AssetManager.loadImages must take a filepath string of a sound or a directory as its parameter.")
+            raise Exception("(PyGMi Error) AssetManager.loadImages says ",imagePath," is not a file or directory.")
     
     def loadMusic(self,musicPath):
         if os.path.isfile(musicPath):
@@ -363,7 +381,7 @@ class AssetManager(object):
             for f in os.listdir(soundPath):
                 self.loadSounds(soundPath+"/"+f)
         else:
-            raise Exception("(PyGMi Error) AssetManager.loadSounds must take a filepath string of a sound or a directory as its parameter.")
+            raise Exception("(PyGMi Error) AssetManager.loadSounds says ",soundPath,"is not a file or directory.")
         
     def playSound(self,name,loops):
         self.sounds[name].play(loops)
@@ -385,17 +403,25 @@ class Sprite(object):
         self.y = y;
         self.w = w;
         self.h = h;
-        self.frameTime = 1
         self.index = 0
         self.flipx = False
         self.flipy = False
+        self.angle = 0
         self.loadImages(pathOrSurfaces)
+        if len(self.images) < 2:
+            self.frameTime = 0
+        else:
+            self.frameTime = 1
 
     def loadImages(self,pathOrSurfaces):
         if isinstance(pathOrSurfaces,str) == False:
             if hasattr(pathOrSurfaces,"__iter__"):
-                for item in pathOrSurfaces:
-                    self.loadImages(item)
+                if isinstance(pathOrSurfaces,dict):
+                    for key in pathOrSurfaces:
+                        self.loadImages(pathOrSurfaces[key])
+                else:
+                    for item in pathOrSurfaces:
+                        self.loadImages(item)
             elif type(pathOrSurfaces) == pygame.Surface:
                 self.image = pathOrSurfaces
                 self.images.append(pathOrSurfaces)
@@ -409,12 +435,15 @@ class Sprite(object):
                 self.index = 0
                 self.image = self.images[0]
             else:
-                raise Exception("(PyGMi Error) loadImage's parameter wasn't a filepath, directory, Pygame Surface, or sequence thereof.")
-        if len(self.images) < 2:
-            self.frameTime = 0
+                raise Exception("(PyGMi Error) loadImage says ",pathOrSurfaces," is not a file, directory, Surface or iterable container.")
         #Convert images for optimal display time.
         if self.image:
             self.image = self.image.convert_alpha()
+            #Autoset the sprite's w and h, if necessary.
+            if self.w == None:
+                self.w = self.image.get_width()
+            if self.h == None:
+                self.h = self.image.get_height()
         for i in range(0,len(self.images)):
             self.images[i] = self.images[i].convert_alpha()
     
@@ -571,6 +600,10 @@ class Object(object):
             self._drawchange = True
         if self.bbox:
             self.bbox.setFlipped(flipped_x, flipped_y)
+            
+    def rotate(self,angle):
+        if self.sprite:
+            self.sprite.angle = angle
     
     def isSolid(self):
         return self.solid
@@ -614,7 +647,7 @@ class Object(object):
         if self.visible and self.sprite:
             self.sprite.render()
             img = pygame.transform.flip(self.sprite.image,self.sprite.flipx,self.sprite.flipy)
-            #pygame.transform.scale(img, (width, height))
+            img = pygame.transform.rotate(img,self.sprite.angle)
             self.window.blit(img,(self.x + self.sprite.x-viewx,self.y + self.sprite.y-viewy))
 
 class Bbox(object):

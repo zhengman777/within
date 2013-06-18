@@ -1,4 +1,26 @@
 -----------
+PyGMi 2.010 [2013-06-18]
+-----------
+
+	New behavior:
+	
+		1) event_mousePressed and eventmouseReleased now return the position of the mouse in the room,
+		rather than on the screen. This only matters if you make use of Room.viewx and Room.viewy.
+
+	New features:
+		
+		1) Whether a key is currently down is now stored in Pygmi.keys[K_foo] as True or False.
+
+	Tweaks and Fixes:
+	
+		1) Pygmi.createInstance(object) now returns the passed object. This helps with nested function calls.
+		
+		2) If None is passed as the width or height of a Sprite, it will be auto-sized to its first loaded image.
+		
+		3) AssetManager now works properly with directory-based animations. To use:
+			assets.images["character"]["walk"] (will animate all images in img/character/walk)
+
+-----------
 PyGMi 2.000 [2013-06-12]
 -----------
 
