@@ -1,8 +1,8 @@
 '''
 Created: 2013-05-09
-Updated: 2013-06-18
+Updated: 2013-06-19
 @author: Catt
-@version: 2.010
+@version: 2.100
 '''
 
 from collections import OrderedDict
@@ -303,8 +303,8 @@ class Room(object):
                     index += 1
                     if self.renderCulling == False:
                         obj.render(self.viewx,self.viewy,self.vieww,self.viewh)
-                    elif ((obj.x+obj.sprite.x+obj.sprite.w) - self.viewx > 0 and (obj.y+obj.sprite.y+obj.sprite.h) - self.viewy > 0 
-                          and (obj.x+obj.sprite.x) - self.viewx < self.w and (obj.y+obj.sprite.y) - self.viewy < self.h):
+                    elif ((obj.x+obj._s_x+obj.sprite.w) - self.viewx > 0 and (obj.y+obj._s_y+obj.sprite.h) - self.viewy > 0 
+                          and (obj.x+obj._s_x) - self.viewx < self.w and (obj.y+obj._s_y) - self.viewy < self.h):
                         obj.render(self.viewx,self.viewy,self.vieww,self.viewh)
         del self.lRender[index:]
         if sort:
@@ -391,11 +391,11 @@ class AssetManager(object):
         
 class Sprite(object): 
     '''
-    The Sprite tracks an image and its bounding box.
+    The Sprite tracks an image.
     It's relatively straight forward.
     ''' 
     
-    def __init__(self,pathOrSurfaces,x,y,w,h):
+    def __init__(self,pathOrSurfaces,w,h,x=None,y=None):
         self.image = None
         self.images = []
         self.alphas = []
@@ -472,20 +472,16 @@ class Sprite(object):
                     self.images[i].set_at((j,k),c)
      
     def setAlphaKey(self,color):
+        if self.image:
+            self.image.set_colorkey(color)
         for image in self.images:
             image.set_colorkey(color)
     
     def setAlpha(self,value):
+        if self.image:
+            self.image.set_alpha(value)
         for image in self.images:
             image.set_alpha(value)
-            
-    def setFlipped(self,flipped_x,flipped_y):
-        if self.flipx != flipped_x:
-            self.x = -(self.x + self.w)
-        if self.flipy != flipped_y:
-            self.y = -(self.y + self.h)
-        self.flipx = flipped_x
-        self.flipy = flipped_y
     
     def setFrameTime(self,frameTime):
         self.frameTime = frameTime
@@ -515,24 +511,26 @@ class Object(object):
     3) Add the event function to the Object class, but leave it empty since it will be overridden.
     '''
     
-    def __init__(self,sprite,x,y):
+    def __init__(self,x,y):
         self.game = None
         self.room = None
         self.window = None
         self.assets = None
         self.x = x
         self.y = y
-        self.sprite = sprite
-        if sprite:
-            self.bbox = Bbox(sprite.x,sprite.y,sprite.w,sprite.h)
-        else:
-            self.bbox = Bbox(0,0,0,0)
+        self.sprite = None
+        self.bbox = Bbox(0,0,0,0)
         self.solid = False
         self.visible = True
         self.active = True
         self.depth = 0;
         self._destroyed = False
         self._poschange = False
+        self._flipped_x = False
+        self._flipped_y = False
+        self._angle = 0
+        self._s_x = 0 #Sprite X position
+        self._s_y = 0 #Sprite Y position
         self._x = x #Previous X position
         self._y = y #Previous Y position
         self._drawchange = False
@@ -541,8 +539,24 @@ class Object(object):
         self._visiblechange = False
         self._activechange = False
 
-    def setSprite(self,sprite):
+    def setSprite(self,sprite,x=None,y=None,autobbox=True):
         self.sprite = sprite
+        if x != None:
+            self._s_x = x
+            sprite.x = x
+        else:
+            if sprite.x != None:
+                self._s_x = sprite.x
+        if y != None:
+            self._s_y = y
+            sprite.y = y
+        else:
+            if sprite.y != None:
+                self._s_y = sprite.y
+        if sprite and autobbox:
+            self._b_x = x
+            self._b_y = y
+            self.setBbox(x,y,sprite.w,sprite.h)
         self._drawchange = True
     
     def setX(self,x):
@@ -573,7 +587,15 @@ class Object(object):
         self._poschange = True
         self._drawchange = True
     
-    def setBbox(self,x,y,w,h):
+    def setBbox(self,x=None,y=None,w=None,h=None):
+        if not x:
+            x = self.bbox.x
+        if not y:
+            y = self.bbox.y
+        if not w:
+            w = self.bbox.w
+        if not h:
+            h = self.bbox.h
         self.bbox = Bbox(x,y,w,h)
         
     def setSolid(self,solid):
@@ -594,16 +616,18 @@ class Object(object):
         self._depthchange = True
         self._drawchange = True
         
-    def setFlipped(self,flipped_x,flipped_y):
-        if self.sprite:
-            self.sprite.setFlipped(flipped_x,flipped_y)
-            self._drawchange = True
-        if self.bbox:
-            self.bbox.setFlipped(flipped_x, flipped_y)
+    def setFlipped(self,flipped_x,flipped_y, autobbox=True):
+        if self._flipped_x != flipped_x:
+            self._s_x = -(self._s_x + self.sprite.w)
+        if self._flipped_y != flipped_y:
+            self._s_y = -(self._s_y + self.sprite.h)
+        self._flipped_x = flipped_x
+        self._flipped_y = flipped_y
+        if autobbox:
+            self.setBbox(-(self.bbox.x + self.bbox.w),-(self.bbox.y + self.bbox.h))
             
     def rotate(self,angle):
-        if self.sprite:
-            self.sprite.angle = angle
+        self._angle = angle
     
     def isSolid(self):
         return self.solid
@@ -646,9 +670,9 @@ class Object(object):
     def render(self,viewx,viewy,vieww,viewh):
         if self.visible and self.sprite:
             self.sprite.render()
-            img = pygame.transform.flip(self.sprite.image,self.sprite.flipx,self.sprite.flipy)
-            img = pygame.transform.rotate(img,self.sprite.angle)
-            self.window.blit(img,(self.x + self.sprite.x-viewx,self.y + self.sprite.y-viewy))
+            img = pygame.transform.flip(self.sprite.image,self._flipped_x,self._flipped_y)
+            img = pygame.transform.rotate(img,self._angle)
+            self.window.blit(img,(self.x + self._s_x - viewx, self.y + self._s_y - viewy))
 
 class Bbox(object):
     
@@ -670,16 +694,7 @@ class Bbox(object):
         return self.x
     
     def right(self):
-        return self.x+self.w
-    
-    def setFlipped(self,flipped_x,flipped_y):
-        if self.flipx != flipped_x:
-            self.x = -(self.x + self.w)
-        if self.flipy != flipped_y:
-            self.y = -(self.y + self.h)
-        self.flipx = flipped_x
-        self.flipy = flipped_y
-         
+        return self.x+self.w         
     
 class CollisionTree(object):
     MAX_OBJECTS = 10

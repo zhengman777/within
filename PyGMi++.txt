@@ -1,4 +1,20 @@
 -----------
+PyGMi 2.100 [2013-06-19]
+-----------
+				
+		New behavior:
+		
+			2) X and Y components can be set in a Sprite's constructor OR in Object.setSprite.
+				This allows for position memory on the side of both Sprites and Objects.
+				
+			3) Object no longer takes a sprite in its constructor. Use Object.setSprite:
+				Object.setSprite(sprite,x=None,y=None)
+					
+		Tweaks and fixes:
+			
+			1) Sprite.setAlpha() and Sprite.setAlphaKey() should work properly now.
+
+-----------
 PyGMi 2.010 [2013-06-18]
 -----------
 
@@ -37,7 +53,7 @@ New behavior:
 	all Objects in the Room also have their event_create() methods called. The idea is to create all of a Room's
 	Objects in its event_create() method, and then have the objects set themselves up in their own event_create() methods.
 	This has an added advantage in that by the time such methods are called, both the Room and Objects will have access
-	to a variety of variables. Room will get acces to Pygmi via Room.game, the rendering window via Room.window and the
+	to a variety of variables. Room will get access to Pygmi via Room.game, the rendering window via Room.window and the
 	Asset Manager via Room.assetManager. Objects will have access to the same variables as well as a reference to their
 	room via Object.room. To add an Object to the active room, call game.createInstance(object).
 
