@@ -17,7 +17,7 @@ class Enemy(pygmi.Object):
         if self.recoilAnim > 0:
             self.recoilAnim -= 1
         if self.recoilCounter > 0:
-            self.x += self.recoilDistance * self.recoilSide
+            self.move(self.recoilDistance*self.recoilSide,0)
             self.recoilCounter -= 1
         self.z = self.y
         self.setDepth(-self.z)
@@ -30,13 +30,15 @@ class Apathol(Enemy):
         self.weight = 1
         self.shadow = shadow
         self.z = y
+        super().__init__(None,x,y)
+        self.setSolid(True)
+
+    def event_create(self):
         sprIdle = pygmi.Sprite("img/enemy/apathol_idle",-8,-38,16,18)
         sprIdle.setFrameTime(30)
         sprRecoil = pygmi.Sprite("img/enemy/apathol_recoil",-24,-52,42,44)
         sprRecoil.setFrameTime(4)
         self.apathol = {'idle':sprIdle,'recoil':sprRecoil}
-        super().__init__(self.apathol['idle'],x,y)
-        self.setSolid(True)
 
     def update(self):
         if self.recoilAnim == self.recoilTime:

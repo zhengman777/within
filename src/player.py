@@ -32,7 +32,11 @@ class Character(pygmi.Object):
         self.kickAnim = 0
         self.datkAnim = 0
         self.akickAnim = 0
-        sprIdle = pygmi.Sprite("img/char/boy_idle",-18,-64,30,64)
+        super().__init__(None,x,y)
+        self.setSolid(True)
+
+    def event_create(self):
+        sprIdle = pygmi.Sprite(self.assets.images["char"]["boy_idle"],-18,-64,30,64)
         sprIdle.setFrameTime(30)
         sprWalk = pygmi.Sprite("img/char/boy_walk",-18,-66,30,66)
         sprWalk.setFrameTime(8)
@@ -54,8 +58,6 @@ class Character(pygmi.Object):
         self.boy = {'idle':sprIdle,'walk':sprWalk,'run':sprRun,'punch1':sprPunch1,
                     'punch2':sprPunch2,'kick':sprKick,'datk':sprDatk,'jump':sprJump,
                     'land':sprLand,'akick':sprAkick}
-        super().__init__(self.boy['idle'],x,y)
-        self.setSolid(True)
 
     def event_keyPressed(self,key):
         if key == K_w:
@@ -147,7 +149,7 @@ class Character(pygmi.Object):
             if self.y == self.z:
                 self.jumpRelease = 0
                 self.jumpSpeed = self.maxJumpSpeed
-                self.y -= self.jumpSpeed
+                self.move(0,-self.jumpSpeed)
                 airborne = 1
                 self.boy['jump'].index = 0
 
@@ -218,42 +220,42 @@ class Character(pygmi.Object):
         if self.punch1Anim == 18:
             oHtbxPunch1 = Hitbox(self.x+4*self.x_scale,self.y-44,"punch1",self)
             oHtbxPunch1.setFlipped(self.sprite.flipx,0)
-            self.game.activeRoom.addToRoom(oHtbxPunch1)
+            self.game.createInstance(oHtbxPunch1)
         if self.punch1Anim > 0:
             self.punch1Anim -= 1
             self.setSprite(self.boy['punch1'])
         if self.punch2Anim == 24:
             oHtbxPunch2 = Hitbox(self.x+4*self.x_scale,self.y-44,"punch2",self)
             oHtbxPunch2.setFlipped(self.sprite.flipx,0)
-            self.game.activeRoom.addToRoom(oHtbxPunch2)
+            self.game.createInstance(oHtbxPunch2)
         if self.punch2Anim > 0:
             self.punch2Anim -= 1
             self.setSprite(self.boy['punch2'])
         if self.kickAnim == 24:
             oHtbxKick = Hitbox(self.x+4*self.x_scale,self.y-32,"kick",self)
             oHtbxKick.setFlipped(self.sprite.flipx,0)
-            self.game.activeRoom.addToRoom(oHtbxKick)
+            self.game.createInstance(oHtbxKick)
         if self.kickAnim > 0:
             self.kickAnim -= 1
             self.setSprite(self.boy['kick'])
         if self.akickAnim == 14:
             oHtbxAkick = Hitbox(self.x+4*self.x_scale,self.y-30,"akick",self)
             oHtbxAkick.setFlipped(self.sprite.flipx,0)
-            self.game.activeRoom.addToRoom(oHtbxAkick)
+            self.game.createInstance(oHtbxAkick)
         if self.akickAnim > 0:
             self.akickAnim -= 1
             self.setSprite(self.boy['akick'])
         if self.datkAnim == 21:
             oHtbxDatk = Hitbox(self.x,self.y-30,"datk",self)
             oHtbxDatk.setFlipped(self.sprite.flipx,0)
-            self.game.activeRoom.addToRoom(oHtbxDatk)
+            self.game.createInstance(oHtbxDatk)
         if self.datkAnim > 6:
             self.datkAnim -= 1
             self.setSprite(self.boy['datk'])
-            self.x += self.xDashSpeed*self.runModifier
-            self.y += self.yDashSpeed*self.runModifier
+            self.move(self.xDashSpeed*self.runModifier,self.yDashSpeed*self.runModifier)
             self.z += self.yDashSpeed*self.runModifier
         elif self.datkAnim <= 6 and self.datkAnim > 0:
+            self.runModifier = 1
             self.datkAnim -= 1
             self.setSprite(self.boy['datk'])
         for i in range(0,len(self.listRunClock)):
@@ -261,7 +263,7 @@ class Character(pygmi.Object):
                 self.listRunClock[i] -= 1
         if self.y < self.z:
             self.jumpSpeed -= self.gravity
-            self. y -= self.jumpSpeed
+            self.move(0,-self.jumpSpeed)
             if self.jumpSpeed >= 0 and self.attacking == 0:
                 self.setSprite(self.boy['jump'])
                 if self.boy['jump'].index == 5:
@@ -273,8 +275,7 @@ class Character(pygmi.Object):
             self.aKickAnim = 0
         if keys[K_SPACE] and self.jumpRelease == 0 and self.jumpSpeed > 0:
             self.jumpSpeed += .125
-        self.x += self.xSpeed*self.runModifier
-        self.y += self.ySpeed*self.runModifier
+        self.move(self.xSpeed*self.runModifier,self.ySpeed*self.runModifier)
         self.z += self.ySpeed*self.runModifier
         self.setDepth(-self.z)
         self.shadow.y = self.z-6

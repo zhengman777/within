@@ -15,6 +15,11 @@ class Hitbox(pygmi.Object):
         self.hitbox = hitbox
         self.owner = owner
         self.enemyList = []
+        super().__init__(None,x,y)
+        self.setSolid(True)
+        #self.setVisible(False)
+
+    def event_create(self):
         htbxBoyPunch1 = pygmi.Sprite("img/htbx/zPunch1.png",0,0,17,14)
         htbxBoyPunch2 = pygmi.Sprite("img/htbx/zPunch2.png",0,0,17,14)
         htbxBoyKick = pygmi.Sprite("img/htbx/zKick.png",0,0,21,16)
@@ -22,33 +27,29 @@ class Hitbox(pygmi.Object):
         htbxBoyAkick = pygmi.Sprite("img/htbx/zAkick.png",0,0,21,16)
         self.htbxBoy = {'punch1':htbxBoyPunch1,'punch2':htbxBoyPunch2,'kick':htbxBoyKick,
             'datk':htbxBoyDatk,'akick':htbxBoyAkick}
-        if hitbox == "punch1":
+        if self.hitbox == "punch1":
             self.sprite = self.htbxBoy['punch1']
             self.countdown = 8
             self.power = 1
-        if hitbox == "punch2":
+        if self.hitbox == "punch2":
             self.sprite = self.htbxBoy['punch2']
             self.countdown = 8
             self.power = 1
-        if hitbox == "kick":
+        if self.hitbox == "kick":
             self.sprite = self.htbxBoy['kick']
             self.countdown = 8
             self.power = 5
-        if hitbox == "datk":
+        if self.hitbox == "datk":
             self.sprite = self.htbxBoy['datk']
             self.countdown = 21
             self.power = 5
-        if hitbox == 'akick':
+        if self.hitbox == 'akick':
             self.sprite = self.htbxBoy['akick']
             self.countdown = 10
             self.power = 8
-        super().__init__(self.sprite,x,y)
-        self.setSolid(True)
-        #self.setVisible(False)
 
     def event_collision(self,other):
         if type(other) == Apathol:
-            print('ouch')
             if other not in self.enemyList:
                 self.enemyList.append(other)
                 other.recoilAnim = other.recoilTime
