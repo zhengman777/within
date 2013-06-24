@@ -3,11 +3,15 @@ from pygame.locals import *
 
 class Button(pygmi.Object):
 
-    def __init__(self,spriteunlit,spritelit,x,y):
+    def __init__(self,x,y):
+        super().__init__(x,y)
+
+    def event_create(self,spriteunlit,spritelit):
         self.spriteunlit = spriteunlit
         self.spritelit = spritelit
-        super().__init__(self.spriteunlit,x,y)
+        self.setSprite(self.spriteunlit)
 
+    # The buttons are being added to the room (sprites and objects - even their positions - exist), but this code does not work
     def mouseOver(self):
         self.mouseX, self.mouseY = pygame.mouse.get_pos()
         if self.mouseX >= self.x and self.mouseX <= self.x+self.sprite.w and self.mouseY >= self.y and self.mouseY <= self.y+self.sprite.h:
@@ -15,6 +19,7 @@ class Button(pygmi.Object):
         else:
             return False
 
+    # I don't think this is needed.
     def event_pressed(self):
         pass
 
@@ -29,10 +34,13 @@ class Button(pygmi.Object):
 class PlayButton(Button):
 
     def __init__(self,x,y,game):
-        self.sprPlay = pygmi.Sprite("img/hud/play.png",0,0,64,30)
-        self.sprPlayLit = pygmi.Sprite("img/hud/playlit.png",0,0,64,30)
         self.game = game
-        super().__init__(self.sprPlay,self.sprPlayLit,x,y)
+        super().__init__(x,y)
+
+    def event_create(self):
+        self.sprPlay = pygmi.Sprite(self.assets.images["hud"]["play.png"],0,0,64,30)
+        self.sprPlayLit = pygmi.Sprite(self.assets.images["hud"]["playlit.png"],0,0,64,30)
+        super().event_create(self.sprPlay,self.sprPlayLit)
 
     def event_pressed(self):
         self.game.gotoRoom("street")
@@ -43,10 +51,13 @@ class PlayButton(Button):
 class QuitButton(Button):
 
     def __init__(self,x,y,game):
-        self.sprQuit = pygmi.Sprite("img/hud/quit.png",0,0,64,30)
-        self.sprQuitLit = pygmi.Sprite("img/hud/quitlit.png",0,0,64,30)
         self.game = game
-        super().__init__(self.sprQuit,self.sprQuitLit,x,y)
+        super().__init__(x,y)
+
+    def event_create(self):
+        self.sprQuit = pygmi.Sprite(self.assets.images["hud"]["quit.png"],0,0,64,30)
+        self.sprQuitLit = pygmi.Sprite(self.assets.images["hud"]["quitlit.png"],0,0,64,30)
+        super().event_create(self.sprQuit,self.sprQuitLit)
 
     def event_pressed(self):
         self.game.quit()

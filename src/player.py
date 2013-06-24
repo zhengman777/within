@@ -32,28 +32,28 @@ class Character(pygmi.Object):
         self.kickAnim = 0
         self.datkAnim = 0
         self.akickAnim = 0
-        super().__init__(None,x,y)
+        super().__init__(x,y)
         self.setSolid(True)
 
     def event_create(self):
         sprIdle = pygmi.Sprite(self.assets.images["char"]["boy_idle"],-18,-64,30,64)
         sprIdle.setFrameTime(30)
-        sprWalk = pygmi.Sprite("img/char/boy_walk",-18,-66,30,66)
+        sprWalk = pygmi.Sprite(self.assets.images["char"]["boy_walk"],-18,-66,30,66)
         sprWalk.setFrameTime(8)
-        sprRun = pygmi.Sprite("img/char/boy_run",-22,-70,44,68)
+        sprRun = pygmi.Sprite(self.assets.images["char"]["boy_run"],-22,-70,44,68)
         sprRun.setFrameTime(5)
-        sprPunch1 = pygmi.Sprite("img/char/boy_punch1",-18,-64,40,64)
+        sprPunch1 = pygmi.Sprite(self.assets.images["char"]["boy_punch1"],-18,-64,40,64)
         sprPunch1.setFrameTime(2)
-        sprPunch2 = pygmi.Sprite("img/char/boy_punch2",-20,-64,38,64)
+        sprPunch2 = pygmi.Sprite(self.assets.images["char"]["boy_punch2"],-20,-64,38,64)
         sprPunch2.setFrameTime(2)
-        sprKick = pygmi.Sprite("img/char/boy_kick",-18,-64,40,64)
+        sprKick = pygmi.Sprite(self.assets.images["char"]["boy_kick"],-18,-64,40,64)
         sprKick.setFrameTime(2)
-        sprDatk = pygmi.Sprite("img/char/boy_datk",-20,-66,40,64)
+        sprDatk = pygmi.Sprite(self.assets.images["char"]["boy_datk"],-20,-66,40,64)
         sprDatk.setFrameTime(3)
-        sprJump = pygmi.Sprite("img/char/boy_jump",-18,-66,32,66)
+        sprJump = pygmi.Sprite(self.assets.images["char"]["boy_jump"],-18,-66,32,66)
         sprJump.setFrameTime(2)
-        sprLand = pygmi.Sprite("img/char/boy_land.png",-16,-66,30,66)
-        sprAkick = pygmi.Sprite("img/char/boy_akick",-12,-59,36,60)
+        sprLand = pygmi.Sprite(self.assets.images["char"]["boy_land.png"],-16,-66,30,66)
+        sprAkick = pygmi.Sprite(self.assets.images["char"]["boy_akick"],-12,-59,36,60)
         sprAkick.setFrameTime(2)
         self.boy = {'idle':sprIdle,'walk':sprWalk,'run':sprRun,'punch1':sprPunch1,
                     'punch2':sprPunch2,'kick':sprKick,'datk':sprDatk,'jump':sprJump,
@@ -104,18 +104,14 @@ class Character(pygmi.Object):
                 self.boy['walk'].index = 0
             elif self.running == 1:
                 self.boy['run'].index = 0
-            for key, value in self.boy.items():
-                self.boy[key].setFlipped(1,0)
-            self.bbox.setFlipped(1,0)
+            self.setFlipped(1,0)
         if key == K_d and self.dominantX != 1 and self.attacking == 0:
             self.x_scale = 1
             if self.running == 0:
                 self.boy['walk'].index = 0
             elif self.running == 1:
                 self.boy['run'].index = 0
-            for key, value in self.boy.items():
-                self.boy[key].setFlipped(0,0)
-            self.bbox.setFlipped(1,0)
+            self.setFlipped(0,0)
         if key == K_j:
             if self.z == self.y:
                 if self.moving == 0:
@@ -191,15 +187,9 @@ class Character(pygmi.Object):
         if keys[K_a] and self.dominantX != 2 and self.stillHolding[2] == 1 and self.attacking == 0:
             self.xSpeed = -3
             self.x_scale = -1
-            for key, value in self.boy.items():
-                self.boy[key].setFlipped(1,0)
-            self.bbox.setFlipped(1,0)
         if keys[K_d] and self.dominantX != 1 and self.stillHolding[3] == 1 and self.attacking == 0:
             self.xSpeed = 3
             self.x_scale = 1
-            for key, value in self.boy.items():
-                self.boy[key].setFlipped(0,0)
-            self.bbox.setFlipped(1,0)
         self.moving = abs(self.xSpeed) + abs(self.ySpeed)
         if self.datkAnim == 0:
             if not (keys[K_a] or keys[K_d] or keys[K_w] or keys[K_s]):
@@ -290,7 +280,10 @@ class HUD(pygmi.Object):
         self.hp = str(character.hp)
         self.character = character
         self.sprHP = pygmi.Sprite(pygmi.Tools.makeText(self.hp,None,None,None),0,0,0,0)
-        super().__init__(self.sprHP,x,y)
+        super().__init__(x,y)
+
+    def event_create(self):
+        self.setSprite(self.sprHP)
 
     def update(self):
         if self.character.hp != self.hp:

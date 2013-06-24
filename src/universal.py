@@ -4,9 +4,12 @@ from enemy import Enemy, Apathol
 class Shadow(pygmi.Object):
 
     def __init__(self,sprite,x,y):
-        self.sprite = sprite
-        self.sprite.setAlpha(100)
-        super().__init__(self.sprite,x,y)
+        self.spr = sprite
+        self.spr.setAlpha(100)
+        super().__init__(x,y)
+
+    def event_create(self):
+        self.setSprite(self.spr)
 
 class Hitbox(pygmi.Object):
 
@@ -15,16 +18,16 @@ class Hitbox(pygmi.Object):
         self.hitbox = hitbox
         self.owner = owner
         self.enemyList = []
-        super().__init__(None,x,y)
+        super().__init__(x,y)
         self.setSolid(True)
         #self.setVisible(False)
 
     def event_create(self):
-        htbxBoyPunch1 = pygmi.Sprite("img/htbx/zPunch1.png",0,0,17,14)
-        htbxBoyPunch2 = pygmi.Sprite("img/htbx/zPunch2.png",0,0,17,14)
-        htbxBoyKick = pygmi.Sprite("img/htbx/zKick.png",0,0,21,16)
-        htbxBoyDatk = pygmi.Sprite("img/htbx/zDatk.png",0,0,19,30)
-        htbxBoyAkick = pygmi.Sprite("img/htbx/zAkick.png",0,0,21,16)
+        htbxBoyPunch1 = pygmi.Sprite(self.assets.images["htbx"]["zPunch1.png"],0,0,17,14)
+        htbxBoyPunch2 = pygmi.Sprite(self.assets.images["htbx"]["zPunch2.png"],0,0,17,14)
+        htbxBoyKick = pygmi.Sprite(self.assets.images["htbx"]["zKick.png"],0,0,21,16)
+        htbxBoyDatk = pygmi.Sprite(self.assets.images["htbx"]["zDatk.png"],0,0,19,30)
+        htbxBoyAkick = pygmi.Sprite(self.assets.images["htbx"]["z.Akickpng"],0,0,21,16)
         self.htbxBoy = {'punch1':htbxBoyPunch1,'punch2':htbxBoyPunch2,'kick':htbxBoyKick,
             'datk':htbxBoyDatk,'akick':htbxBoyAkick}
         if self.hitbox == "punch1":

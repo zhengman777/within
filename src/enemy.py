@@ -4,6 +4,7 @@ from pygame.locals import *
 class Enemy(pygmi.Object):
 
     def __init__(self,sprite,x,y):
+        self.spr = sprite
         self.zPunch1Hit = 0
         self.zPunch2Hit = 0
         self.zKickHit = 0
@@ -11,7 +12,10 @@ class Enemy(pygmi.Object):
         self.recoilSide = 0
         self.recoilCounter = 0
         self.recoilDistance = 0
-        super().__init__(sprite,x,y)
+        super().__init__(x,y)
+
+    def event_create(self):
+        self.setSprite(self.spr)
 
     def update(self):
         if self.recoilAnim > 0:
@@ -34,9 +38,9 @@ class Apathol(Enemy):
         self.setSolid(True)
 
     def event_create(self):
-        sprIdle = pygmi.Sprite("img/enemy/apathol_idle",-8,-38,16,18)
+        sprIdle = pygmi.Sprite(self.assets.images["enemy"]["apathol_idle"],-8,-38,16,18)
         sprIdle.setFrameTime(30)
-        sprRecoil = pygmi.Sprite("img/enemy/apathol_recoil",-24,-52,42,44)
+        sprRecoil = pygmi.Sprite(self.assets.images["enemy"]["apathol_recoil"],-24,-52,42,44)
         sprRecoil.setFrameTime(4)
         self.apathol = {'idle':sprIdle,'recoil':sprRecoil}
 
