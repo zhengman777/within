@@ -38,9 +38,9 @@ class Apathol(Enemy):
         self.setSolid(True)
 
     def event_create(self):
-        sprIdle = pygmi.Sprite(self.assets.images["enemy"]["apathol_idle"],-8,-38,16,18)
+        sprIdle = pygmi.Sprite(self.assets.images["enemy"]["apathol_idle"],16,18,-8,-38)
         sprIdle.setFrameTime(30)
-        sprRecoil = pygmi.Sprite(self.assets.images["enemy"]["apathol_recoil"],-24,-52,42,44)
+        sprRecoil = pygmi.Sprite(self.assets.images["enemy"]["apathol_recoil"],42,44,-24,-52)
         sprRecoil.setFrameTime(4)
         self.apathol = {'idle':sprIdle,'recoil':sprRecoil}
 

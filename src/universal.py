@@ -23,11 +23,11 @@ class Hitbox(pygmi.Object):
         #self.setVisible(False)
 
     def event_create(self):
-        htbxBoyPunch1 = pygmi.Sprite(self.assets.images["htbx"]["zPunch1.png"],0,0,17,14)
-        htbxBoyPunch2 = pygmi.Sprite(self.assets.images["htbx"]["zPunch2.png"],0,0,17,14)
-        htbxBoyKick = pygmi.Sprite(self.assets.images["htbx"]["zKick.png"],0,0,21,16)
-        htbxBoyDatk = pygmi.Sprite(self.assets.images["htbx"]["zDatk.png"],0,0,19,30)
-        htbxBoyAkick = pygmi.Sprite(self.assets.images["htbx"]["z.Akickpng"],0,0,21,16)
+        htbxBoyPunch1 = pygmi.Sprite(self.assets.images["htbx"]["zPunch1.png"],17,14,0,0)
+        htbxBoyPunch2 = pygmi.Sprite(self.assets.images["htbx"]["zPunch2.png"],17,14,0,0)
+        htbxBoyKick = pygmi.Sprite(self.assets.images["htbx"]["zKick.png"],21,16,0,0)
+        htbxBoyDatk = pygmi.Sprite(self.assets.images["htbx"]["zDatk.png"],19,30,0,0)
+        htbxBoyAkick = pygmi.Sprite(self.assets.images["htbx"]["z.Akickpng"],21,16,0,0)
         self.htbxBoy = {'punch1':htbxBoyPunch1,'punch2':htbxBoyPunch2,'kick':htbxBoyKick,
             'datk':htbxBoyDatk,'akick':htbxBoyAkick}
         if self.hitbox == "punch1":

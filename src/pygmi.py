@@ -2,7 +2,7 @@
 Created: 2013-05-09
 Updated: 2013-06-19
 @author: Catt
-@version: 2.100
+@version: 2.110
 '''
 
 from collections import OrderedDict
@@ -665,14 +665,21 @@ class Object(object):
         pass
     
     def update(self):
+        self.event_update()
+    
+    def event_update(self):
         pass
     
     def render(self,viewx,viewy,vieww,viewh):
+        self.event_render()
         if self.visible and self.sprite:
             self.sprite.render()
             img = pygame.transform.flip(self.sprite.image,self._flipped_x,self._flipped_y)
             img = pygame.transform.rotate(img,self._angle)
             self.window.blit(img,(self.x + self._s_x - viewx, self.y + self._s_y - viewy))
+    
+    def event_render(self):
+        pass
 
 class Bbox(object):
     

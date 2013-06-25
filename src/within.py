@@ -13,8 +13,8 @@ if __name__ == '__main__':
     x_dim = 800
     y_dim = 600
     game = pygmi.Pygmi((x_dim,y_dim), "Test Game", 0)
-    game.addRoom(MainMenu(game))
-    game.addRoom(Street(game))
+    game.addRoom(MainMenu())
+    game.addRoom(Street())
     game.gotoRoom("mainmenu")
 
 

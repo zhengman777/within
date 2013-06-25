@@ -1,5 +1,4 @@
-import pygmi, pygame, os, sys, math
-from pygame.locals import *
+import pygmi, pygame
 
 class Button(pygmi.Object):
 
@@ -33,14 +32,13 @@ class Button(pygmi.Object):
 
 class PlayButton(Button):
 
-    def __init__(self,x,y,game):
-        self.game = game
+    def __init__(self,x,y):
         super().__init__(x,y)
 
     def event_create(self):
-        self.sprPlay = pygmi.Sprite(self.assets.images["hud"]["play.png"],0,0,64,30)
-        self.sprPlayLit = pygmi.Sprite(self.assets.images["hud"]["playlit.png"],0,0,64,30)
-        super().event_create(self.sprPlay,self.sprPlayLit)
+        sprPlay = pygmi.Sprite(self.assets.images["hud"]["play.png"],64,30,0,0)
+        sprPlayLit = pygmi.Sprite(self.assets.images["hud"]["playlit.png"],64,30,0,0)
+        super().event_create(sprPlay,sprPlayLit)
 
     def event_pressed(self):
         self.game.gotoRoom("street")
@@ -50,14 +48,13 @@ class PlayButton(Button):
 
 class QuitButton(Button):
 
-    def __init__(self,x,y,game):
-        self.game = game
+    def __init__(self,x,y):
         super().__init__(x,y)
 
     def event_create(self):
-        self.sprQuit = pygmi.Sprite(self.assets.images["hud"]["quit.png"],0,0,64,30)
-        self.sprQuitLit = pygmi.Sprite(self.assets.images["hud"]["quitlit.png"],0,0,64,30)
-        super().event_create(self.sprQuit,self.sprQuitLit)
+        sprQuit = pygmi.Sprite(self.assets.images["hud"]["quit.png"],64,30)
+        sprQuitLit = pygmi.Sprite(self.assets.images["hud"]["quitlit.png"],64,30)
+        super().event_create(sprQuit,sprQuitLit)
 
     def event_pressed(self):
         self.game.quit()

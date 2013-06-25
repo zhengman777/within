@@ -4,15 +4,15 @@ from menu import Button, PlayButton, QuitButton
 
 class MainMenu(pygmi.Room):
 
-    def __init__(self,game):
-        self.game = game
+    def __init__(self):
         self.x_dim = 800
         self.y_dim = 600
         super().__init__("mainmenu",self.x_dim,self.y_dim)
 
     def event_create(self):
-        oPlay = PlayButton(800-64,600-60,self.game)
-        oQuit = QuitButton(self.x_dim-64,self.y_dim-30,self.game)
+        oPlay = PlayButton(800-64,600-60)
+        oQuit = QuitButton(self.x_dim-64,self.y_dim-30)
         self.setBackground(self.assets.images["bg"]["title.png"])
         self.game.createInstance(oPlay)
         self.game.createInstance(oQuit)
+        print(self.lRender)

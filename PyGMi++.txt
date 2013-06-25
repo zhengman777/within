@@ -1,18 +1,28 @@
 -----------
+PyGMi 2.110 [2013-06-25]
+-----------
+
+	New features:
+	
+		1) Object.event_render has been added to facilitate doing things on render without overriding.
+		
+
+
+-----------
 PyGMi 2.100 [2013-06-19]
 -----------
 				
-		New behavior:
+	New behavior:
 		
-			2) X and Y components can be set in a Sprite's constructor OR in Object.setSprite.
-				This allows for position memory on the side of both Sprites and Objects.
+		2) X and Y components can be set in a Sprite's constructor OR in Object.setSprite.
+			This allows for position memory on the side of both Sprites and Objects.
 				
-			3) Object no longer takes a sprite in its constructor. Use Object.setSprite:
-				Object.setSprite(sprite,x=None,y=None)
+		3) Object no longer takes a sprite in its constructor. Use Object.setSprite:
+			Object.setSprite(sprite,x=None,y=None)
 					
-		Tweaks and fixes:
+	Tweaks and fixes:
 			
-			1) Sprite.setAlpha() and Sprite.setAlphaKey() should work properly now.
+		1) Sprite.setAlpha() and Sprite.setAlphaKey() should work properly now.
 
 -----------
 PyGMi 2.010 [2013-06-18]
