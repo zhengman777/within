@@ -27,7 +27,7 @@ class Hitbox(pygmi.Object):
         htbxBoyPunch2 = pygmi.Sprite(self.assets.images["htbx"]["zPunch2.png"],17,14,0,0)
         htbxBoyKick = pygmi.Sprite(self.assets.images["htbx"]["zKick.png"],21,16,0,0)
         htbxBoyDatk = pygmi.Sprite(self.assets.images["htbx"]["zDatk.png"],19,30,0,0)
-        htbxBoyAkick = pygmi.Sprite(self.assets.images["htbx"]["z.Akickpng"],21,16,0,0)
+        htbxBoyAkick = pygmi.Sprite(self.assets.images["htbx"]["zAkick.png"],21,16,0,0)
         self.htbxBoy = {'punch1':htbxBoyPunch1,'punch2':htbxBoyPunch2,'kick':htbxBoyKick,
             'datk':htbxBoyDatk,'akick':htbxBoyAkick}
         if self.hitbox == "punch1":
