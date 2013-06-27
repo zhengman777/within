@@ -1,8 +1,8 @@
 '''
 Created: 2013-05-09
-Updated: 2013-06-19
+Updated: 2013-06-27
 @author: Catt
-@version: 2.110
+@version: 2.111
 '''
 
 from collections import OrderedDict
@@ -540,6 +540,10 @@ class Object(object):
         self._activechange = False
 
     def setSprite(self,sprite,x=None,y=None,autobbox=True):
+        #Unflip old sprite
+        tempFlip_x = self._flipped_x
+        tempFlip_y = self._flipped_y
+        self.setFlipped(False,False)
         self.sprite = sprite
         if x != None:
             self._s_x = x
@@ -557,6 +561,7 @@ class Object(object):
             self._b_x = x
             self._b_y = y
             self.setBbox(x,y,sprite.w,sprite.h)
+        self.setFlipped(tempFlip_x, tempFlip_y)
         self._drawchange = True
     
     def setX(self,x):
@@ -617,14 +622,18 @@ class Object(object):
         self._drawchange = True
         
     def setFlipped(self,flipped_x,flipped_y, autobbox=True):
+        bbox_x = None
+        bbox_y = None
         if self._flipped_x != flipped_x:
             self._s_x = -(self._s_x + self.sprite.w)
+            bbox_x = -(self.bbox.x + self.bbox.w)
         if self._flipped_y != flipped_y:
             self._s_y = -(self._s_y + self.sprite.h)
+            bbox_y = -(self.bbox.y + self.bbox.h)
         self._flipped_x = flipped_x
         self._flipped_y = flipped_y
         if autobbox:
-            self.setBbox(-(self.bbox.x + self.bbox.w),-(self.bbox.y + self.bbox.h))
+            self.setBbox(bbox_x,bbox_y)
             
     def rotate(self,angle):
         self._angle = angle

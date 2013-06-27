@@ -1,3 +1,11 @@
+PyGMi 2.111 [2013-06-27]
+
+	Tweaks and fixes:
+	
+		1) Setting Sprites now works properly while an object is flipped.
+		
+		2) Bbox now flips properly.
+
 -----------
 PyGMi 2.110 [2013-06-25]
 -----------

@@ -15,4 +15,3 @@ class MainMenu(pygmi.Room):
         self.setBackground(self.assets.images["bg"]["title.png"])
         self.game.createInstance(oPlay)
         self.game.createInstance(oQuit)
-        print(self.lRender)
