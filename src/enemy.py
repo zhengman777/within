@@ -12,6 +12,7 @@ class Enemy(pygmi.Object):
         self.recoilCounter = 0
         self.recoilDistance = 0
         super().__init__(x,y)
+        self.setSolid(True)
 
     def event_create(self):
         self.setSprite(self.spr)
@@ -34,7 +35,6 @@ class Apathol(Enemy):
         self.shadow = shadow
         self.z = y
         super().__init__(None,x,y)
-        self.setSolid(True)
 
     def event_create(self):
         sprIdle = pygmi.Sprite(self.assets.images["enemy"]["apathol_idle"],16,18,-8,-38)
