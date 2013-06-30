@@ -1,5 +1,4 @@
-import pygmi, pygame, os, sys, math
-from pygame.locals import *
+import pygmi
 
 class Enemy(pygmi.Object):
 
@@ -48,9 +47,9 @@ class Apathol(Enemy):
         if self.recoilAnim == self.recoilTime:
             self.apathol['recoil'].index = 0
         if self.recoilAnim > 0:
-            self.sprite = self.apathol['recoil']
+            self.setSprite(self.apathol['recoil'])
         else:
-            self.sprite = self.apathol['idle']
+            self.setSprite(self.apathol['idle'])
         self.shadow.x = self.x-8
         self.shadow.y = self.z
         super().update()

@@ -1,5 +1,4 @@
-import pygmi, pygame, os, sys, math
-from pygame.locals import *
+import pygmi
 from menu import Button, PlayButton, QuitButton
 
 class MainMenu(pygmi.Room):

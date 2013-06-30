@@ -1,15 +1,16 @@
-import pygmi, pygame, os, sys, math
+import pygmi
 from enemy import Enemy, Apathol
 
 class Shadow(pygmi.Object):
 
     def __init__(self,sprite,x,y):
         self.spr = sprite
-        self.spr.setAlpha(100)
         super().__init__(x,y)
 
     def event_create(self):
+        self.spr.setAlpha(100)
         self.setSprite(self.spr)
+
 
 class Hitbox(pygmi.Object):
 
@@ -31,35 +32,36 @@ class Hitbox(pygmi.Object):
         self.htbxBoy = {'punch1':htbxBoyPunch1,'punch2':htbxBoyPunch2,'kick':htbxBoyKick,
             'datk':htbxBoyDatk,'akick':htbxBoyAkick}
         if self.hitbox == "punch1":
-            self.sprite = self.htbxBoy['punch1']
+            self.setSprite(self.htbxBoy['punch1'])
             self.countdown = 8
             self.power = 1
         if self.hitbox == "punch2":
-            self.sprite = self.htbxBoy['punch2']
+            self.setSprite(self.htbxBoy['punch2'])
             self.countdown = 8
             self.power = 1
         if self.hitbox == "kick":
-            self.sprite = self.htbxBoy['kick']
+            self.setSprite(self.htbxBoy['kick'])
             self.countdown = 8
             self.power = 5
         if self.hitbox == "datk":
-            self.sprite = self.htbxBoy['datk']
+            self.setSprite(self.htbxBoy['datk'])
             self.countdown = 21
             self.power = 5
         if self.hitbox == 'akick':
-            self.sprite = self.htbxBoy['akick']
+            self.setSprite(self.htbxBoy['akick'])
             self.countdown = 10
             self.power = 8
 
     def event_collision(self,other):
+        print(other)
         if type(other) == Apathol:
             if other not in self.enemyList:
                 self.enemyList.append(other)
                 other.recoilAnim = other.recoilTime
                 other.hp -= 1
-                if self.sprite.flipx == 0:
+                if self._flipped_x == 0:
                     other.recoilSide = 1
-                elif self.sprite.flipx == 1:
+                elif self._flipped_x == 1:
                     other.recoilSide = -1
                 other.recoilCounter = 4
                 other.recoilDistance = self.power/other.weight

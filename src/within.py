@@ -3,8 +3,7 @@ Created on May 12, 2013
 
 @author: Catt
 '''
-import pygmi, pygame, os, sys, math
-from pygame.locals import *
+import pygmi
 from menu import *
 from street import *
 from mainmenu import *

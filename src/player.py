@@ -1,4 +1,4 @@
-import pygmi, pygame, os, sys, math
+import pygmi, pygame
 from pygame.locals import *
 from universal import Hitbox
 
@@ -40,14 +40,8 @@ class Character(pygmi.Object):
         sprIdle.setFrameTime(30)
         sprWalk = pygmi.Sprite(self.assets.images["char"]["boy_walk"],30,66,-18,-66)
         sprWalk.setFrameTime(8)
-        # Idle and Walk do not jump around - this is because their X and W differ
-        # by exactly the same amount.
         sprRun = pygmi.Sprite(self.assets.images["char"]["boy_run"],44,68,-22,-70)
         sprRun.setFrameTime(5)
-        # For example, if you change Punch1's W to be -28 (so that the X-W differences are
-        # the same across Idle, Walk, and Punch1), then using punch when facing left
-        # is perfectly fine, though facing right is now messed up.
-        # Also notice how the hitboxes are not aligned anymore when facing left.
         sprPunch1 = pygmi.Sprite(self.assets.images["char"]["boy_punch1"],40,64,-18,-64)
         sprPunch1.setFrameTime(2)
         sprPunch2 = pygmi.Sprite(self.assets.images["char"]["boy_punch2"],38,64,-20,-64)
@@ -277,9 +271,9 @@ class Character(pygmi.Object):
         self.z += self.ySpeed*self.runModifier
         self.setDepth(-self.z)
         self.shadow.y = self.z-6
-        if self.sprite.flipx == 0:
+        if self._flipped_x == 0:
             self.shadow.x = self.x-19
-        elif self.sprite.flipx == 1:
+        elif self._flipped_x == 1:
             self.shadow.x = self.x-15
 
 class HUD(pygmi.Object):

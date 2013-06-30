@@ -1,4 +1,4 @@
-import pygmi, pygame, os, sys, math
+import pygmi
 from pygame.locals import *
 from universal import Shadow, Hitbox
 from player import Character, HUD
