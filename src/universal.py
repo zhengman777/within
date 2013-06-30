@@ -70,6 +70,7 @@ class Hitbox(pygmi.Object):
             self.y = self.owner.y-30
         if self.hitbox == "akick":
             self.x = self.owner.x+4*self.owner.x_scale
+            self.setFlipped(self.owner._flipped_x,0)
             self.y = self.owner.y-30
         if self.countdown > 0:
             self.countdown -= 1

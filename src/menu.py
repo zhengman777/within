@@ -10,7 +10,6 @@ class Button(pygmi.Object):
         self.spritelit = spritelit
         self.setSprite(self.spriteunlit)
 
-    # The buttons are being added to the room (sprites and objects - even their positions - exist), but this code does not work
     def mouseOver(self):
         self.mouseX, self.mouseY = pygame.mouse.get_pos()
         if self.mouseX >= self.x and self.mouseX <= self.x+self.sprite.w and self.mouseY >= self.y and self.mouseY <= self.y+self.sprite.h:
@@ -18,7 +17,6 @@ class Button(pygmi.Object):
         else:
             return False
 
-    # I don't think this is needed.
     def event_pressed(self):
         pass
 

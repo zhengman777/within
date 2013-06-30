@@ -104,20 +104,22 @@ class Character(pygmi.Object):
                 self.boy['walk'].index = 0
             elif self.running == 1:
                 self.boy['run'].index = 0
-        if key == K_a and self.dominantX != 2 and self.attacking == 0:
+        if key == K_a and self.dominantX != 2:
             self.x_scale = -1
-            if self.running == 0:
-                self.boy['walk'].index = 0
-            elif self.running == 1:
-                self.boy['run'].index = 0
             self.setFlipped(1,0)
-        if key == K_d and self.dominantX != 1 and self.attacking == 0:
+            if self.attacking == 0:
+                if self.running == 0:
+                    self.boy['walk'].index = 0
+                elif self.running == 1:
+                    self.boy['run'].index = 0
+        if key == K_d and self.dominantX != 1:
             self.x_scale = 1
-            if self.running == 0:
-                self.boy['walk'].index = 0
-            elif self.running == 1:
-                self.boy['run'].index = 0
             self.setFlipped(0,0)
+            if self.attacking == 0:
+                if self.running == 0:
+                    self.boy['walk'].index = 0
+                elif self.running == 1:
+                    self.boy['run'].index = 0
         if key == K_j:
             if self.z == self.y:
                 if self.moving == 0:
@@ -198,7 +200,7 @@ class Character(pygmi.Object):
             self.x_scale = 1
         self.moving = abs(self.xSpeed) + abs(self.ySpeed)
         if self.datkAnim == 0:
-            if not (keys[K_a] or keys[K_d] or keys[K_w] or keys[K_s]):
+            if not (keys[K_a] or keys[K_d] or keys[K_w] or keys[K_s]) and self.y == self.z:
                 self.runModifier = 1
             if self.stillHolding[0] == 0 and self.stillHolding[1] == 0:
                 self.ySpeed = 0
@@ -215,36 +217,36 @@ class Character(pygmi.Object):
                 self.setSprite(self.boy['walk'])
         if self.punch1Anim == 18:
             oHtbxPunch1 = Hitbox(self.x+4*self.x_scale,self.y-44,"punch1",self)
-            oHtbxPunch1.setFlipped(self.sprite.flipx,0)
             self.game.createInstance(oHtbxPunch1)
+            oHtbxPunch1.setFlipped(self._flipped_x,0)
         if self.punch1Anim > 0:
             self.punch1Anim -= 1
             self.setSprite(self.boy['punch1'])
         if self.punch2Anim == 24:
             oHtbxPunch2 = Hitbox(self.x+4*self.x_scale,self.y-44,"punch2",self)
-            oHtbxPunch2.setFlipped(self.sprite.flipx,0)
             self.game.createInstance(oHtbxPunch2)
+            oHtbxPunch2.setFlipped(self._flipped_x,0)
         if self.punch2Anim > 0:
             self.punch2Anim -= 1
             self.setSprite(self.boy['punch2'])
         if self.kickAnim == 24:
             oHtbxKick = Hitbox(self.x+4*self.x_scale,self.y-32,"kick",self)
-            oHtbxKick.setFlipped(self.sprite.flipx,0)
             self.game.createInstance(oHtbxKick)
+            oHtbxKick.setFlipped(self._flipped_x,0)
         if self.kickAnim > 0:
             self.kickAnim -= 1
             self.setSprite(self.boy['kick'])
         if self.akickAnim == 14:
             oHtbxAkick = Hitbox(self.x+4*self.x_scale,self.y-30,"akick",self)
-            oHtbxAkick.setFlipped(self.sprite.flipx,0)
             self.game.createInstance(oHtbxAkick)
+            oHtbxAkick.setFlipped(self._flipped_x,0)
         if self.akickAnim > 0:
             self.akickAnim -= 1
             self.setSprite(self.boy['akick'])
         if self.datkAnim == 21:
             oHtbxDatk = Hitbox(self.x,self.y-30,"datk",self)
-            oHtbxDatk.setFlipped(self.sprite.flipx,0)
             self.game.createInstance(oHtbxDatk)
+            oHtbxDatk.setFlipped(self._flipped_x,0)
         if self.datkAnim > 6:
             self.datkAnim -= 1
             self.setSprite(self.boy['datk'])
