@@ -11,3 +11,4 @@
 - J while walking to kick
 - J while running to dash-attack
 - J while jumping to air-kick
+- K to shoot energy

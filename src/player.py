@@ -1,6 +1,7 @@
 import pygmi, pygame
 from pygame.locals import *
 from universal import Hitbox
+from flare import Flare
 
 class Character(pygmi.Object):
 
@@ -32,6 +33,7 @@ class Character(pygmi.Object):
         self.kickAnim = 0
         self.datkAnim = 0
         self.akickAnim = 0
+        self.throwAnim = 0
         super().__init__(x,y)
         self.setSolid(True)
 
@@ -55,9 +57,11 @@ class Character(pygmi.Object):
         sprLand = pygmi.Sprite(self.assets.images["char"]["boy_land.png"],30,66,-16,-66)
         sprAkick = pygmi.Sprite(self.assets.images["char"]["boy_akick"],36,60,-12,-59)
         sprAkick.setFrameTime(2)
+        sprThrow = pygmi.Sprite(self.assets.images["char"]["boy_throw"],30,64,-18,-64)
+        sprThrow.setFrameTime(2)
         self.boy = {'idle':sprIdle,'walk':sprWalk,'run':sprRun,'punch1':sprPunch1,
                     'punch2':sprPunch2,'kick':sprKick,'datk':sprDatk,'jump':sprJump,
-                    'land':sprLand,'akick':sprAkick}
+                    'land':sprLand,'akick':sprAkick,'throw':sprThrow}
 
     def event_keyPressed(self,key):
         if key == K_w:
@@ -143,6 +147,12 @@ class Character(pygmi.Object):
                 if self.attacking == 0:
                     self.boy['akick'].index = 0
                     self.akickAnim = 14
+        if key == K_k:
+            if self.z == self.y:
+                if self.moving == 0:
+                    if self.attacking == 0:
+                        self.boy['throw'].index = 0
+                        self.throwAnim = 20
         if key == K_SPACE and self.attacking == 0:
             if self.y == self.z:
                 self.jumpRelease = 0
@@ -181,7 +191,7 @@ class Character(pygmi.Object):
     def update(self):
         keys = pygame.key.get_pressed()
         self.attacking = (self.punch1Anim + self.punch2Anim + self.kickAnim + self.datkAnim
-            + self.akickAnim)
+            + self.akickAnim + self.throwAnim)
         if keys[K_w] and self.dominantY != 2 and self.stillHolding[0] == 1 and self.attacking == 0:
             self.ySpeed = -2
         if keys[K_s] and self.dominantY != 1 and self.stillHolding[1] == 1 and self.attacking == 0:
@@ -250,6 +260,12 @@ class Character(pygmi.Object):
             self.runModifier = 1
             self.datkAnim -= 1
             self.setSprite(self.boy['datk'])
+        if self.throwAnim == 20:
+            oFlare = Flare(self.x,self.y-34,self._flipped_x)
+            self.game.createInstance(oFlare)
+        if self.throwAnim > 0:
+            self.throwAnim -= 1
+            self.setSprite(self.boy['throw'])
         for i in range(0,len(self.listRunClock)):
             if self.listRunClock[i] > 0:
                 self.listRunClock[i] -= 1

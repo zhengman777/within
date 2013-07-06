@@ -3,6 +3,7 @@ from pygame.locals import *
 from universal import Shadow, Hitbox
 from player import Character, HUD
 from enemy import Enemy, Apathol
+from flare import Flare
 
 class Street(pygmi.Room):
 

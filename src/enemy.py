@@ -2,8 +2,7 @@ import pygmi
 
 class Enemy(pygmi.Object):
 
-    def __init__(self,sprite,x,y):
-        self.spr = sprite
+    def __init__(self,x,y):
         self.zPunch1Hit = 0
         self.zPunch2Hit = 0
         self.zKickHit = 0
@@ -15,7 +14,7 @@ class Enemy(pygmi.Object):
         self.setSolid(True)
 
     def event_create(self):
-        self.setSprite(self.spr)
+        pass
 
     def update(self):
         if self.recoilAnim > 0:
@@ -34,7 +33,7 @@ class Apathol(Enemy):
         self.weight = 1
         self.shadow = shadow
         self.z = y
-        super().__init__(None,x,y)
+        super().__init__(x,y)
 
     def event_create(self):
         sprIdle = pygmi.Sprite(self.assets.images["enemy"]["apathol_idle"],16,18,-8,-38)
