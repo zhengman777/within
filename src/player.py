@@ -196,7 +196,7 @@ class Character(pygmi.Object):
             self.jumpRelease = 1
 
     def event_collision(self,other):
-        pass
+        print(self.y,self.bbox.bottom(),other.y,other.bbox.top())
 
     def update(self):
         keys = pygame.key.get_pressed()
@@ -308,6 +308,7 @@ class Character(pygmi.Object):
             self.shadow.x = self.x-19
         elif self._flipped_x == 1:
             self.shadow.x = self.x-15
+        print(self.y,self.bbox.bottom(),self.bbox.y)
 
 class HUD(pygmi.Object):
 
@@ -319,8 +320,18 @@ class HUD(pygmi.Object):
 
     def event_create(self):
         self.setSprite(self.sprHP)
+        self.sprHUDfront = pygmi.Sprite(self.assets.images["hud"]["hudfront.png"],800,84,0,0)
+        self.sprHUDback = pygmi.Sprite(self.assets.images["hud"]["hudback.png"],800,84,0,0)
 
     def update(self):
         if self.character.hp != self.hp:
             self.setSprite(pygmi.Sprite(pygmi.Tools.makeText(self.character.hp,None,None,None),0,0,0,0))
             self.hp = self.character.hp
+
+    def event_render(self):
+        self.sprHUDback.render()
+        self.sprHUDfront.render()
+        back = self.sprHUDback.image
+        front = self.sprHUDfront.image
+        self.window.blit(back,(self.x,self.y))
+        self.window.blit(front,(self.x,self.y))
