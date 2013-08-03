@@ -12,7 +12,13 @@ class Character(pygmi.Object):
         self.ySpeed = 0
         self.z = y
         self.x_scale = 1
-        self.hp = 30
+        self.hp = 25
+        self.maxHP = 30
+        self.wp = 25
+        self.maxWP = 30
+        self.emp = 30
+        self.maxEMP = 30
+        self.ally = None
         self.xDashSpeed = 0
         self.yDashSpeed = 0
         self.runModifier = 1
@@ -313,25 +319,44 @@ class Character(pygmi.Object):
 class HUD(pygmi.Object):
 
     def __init__(self,x,y,character):
-        self.hp = str(character.hp)
         self.character = character
-        self.sprHP = pygmi.Sprite(pygmi.Tools.makeText(self.hp,None,None,None),0,0,0,0)
+        #self.sprHP = pygmi.Sprite(pygmi.Tools.makeText(self.hp,None,None,None),0,0,0,0)
         super().__init__(x,y)
 
     def event_create(self):
-        self.setSprite(self.sprHP)
         self.sprHUDfront = pygmi.Sprite(self.assets.images["hud"]["hudfront.png"],800,84,0,0)
         self.sprHUDback = pygmi.Sprite(self.assets.images["hud"]["hudback.png"],800,84,0,0)
-
-    def update(self):
-        if self.character.hp != self.hp:
-            self.setSprite(pygmi.Sprite(pygmi.Tools.makeText(self.character.hp,None,None,None),0,0,0,0))
-            self.hp = self.character.hp
+        self.sprHeart = pygmi.Sprite(self.assets.images["hud"]["heart.png"],66,52,0,0)
+        self.sprWillpower = pygmi.Sprite(self.assets.images["hud"]["willpower.png"],338,8,0,0)
+        self.sprEmpathyLine = pygmi.Sprite(self.assets.images["hud"]["empathyline.png"],348,8,0,0)
+        self.sprEmpathyTwist = pygmi.Sprite(self.assets.images["hud"]["empathytwist.png"],46,56,0,0)
+        self.sprEmpathyJewel = pygmi.Sprite(self.assets.images["hud"]["empathyjewel.png"],10,14,0,0)
+        self.sprClosed = pygmi.Sprite(self.assets.images["hud"]["closed.png"],62,22,0,0)
 
     def event_render(self):
-        self.sprHUDback.render()
-        self.sprHUDfront.render()
         back = self.sprHUDback.image
         front = self.sprHUDfront.image
+        heart = self.sprHeart.image
+        willpower = self.sprWillpower.image
+        empathyLine = self.sprEmpathyLine.image
+        empathyTwist = self.sprEmpathyTwist.image
+        empathyJewel = self.sprEmpathyJewel.image
+        closed = self.sprClosed.image
+        rectHeart = Rect(0,52-52*self.character.hp/self.character.maxHP,66,52)
+        rectWillpower = Rect(338-338*self.character.wp/self.character.maxWP,0,338,8)
+        if self.character.emp <= .8*self.character.maxEMP:
+            rectEmpathyLine = Rect(0,0,348*self.character.emp/(self.character.maxEMP*.8),8)
+            rectEmpathyTwist = Rect(0,0,0,0)
+        if self.character.emp > .8*self.character.maxEMP:
+            rectEmpathyLine = Rect(0,0,348,8)
+            rectEmpathyTwist = Rect(0,56-56*(self.character.emp-self.character.maxEMP*.8)/(self.character.maxEMP*.2),46,56)
         self.window.blit(back,(self.x,self.y))
+        self.window.blit(heart,(self.x+366,self.y+22+52-52*self.character.hp/self.character.maxHP),rectHeart)
+        self.window.blit(willpower,(self.x+12+338-338*self.character.wp/self.character.maxWP,self.y+18),rectWillpower)
+        self.window.blit(empathyLine,(self.x+432,self.y+70),rectEmpathyLine)
+        self.window.blit(empathyTwist,(self.x+744,self.y+16+56-56*(self.character.emp-self.character.maxEMP*.8)/(self.character.maxEMP*.2)),rectEmpathyTwist)
+        if self.character.emp == self.character.maxEMP:
+            self.window.blit(empathyJewel,(self.x+762,self.y+26))
+        if self.character.ally == None:
+            self.window.blit(closed,(self.x+620,self.y+46))
         self.window.blit(front,(self.x,self.y))
