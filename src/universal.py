@@ -9,7 +9,8 @@ class Shadow(pygmi.Object):
 
     def event_create(self):
         self.setSprite(self.spr)
-        self.sprite.setAlpha(100)
+        self.sprite.setAlpha(50)
+        print(self.sprite.image.get_alpha())
 
 class Hitbox(pygmi.Object):
 

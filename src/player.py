@@ -16,6 +16,7 @@ class Character(pygmi.Object):
         self.maxHP = 30
         self.wp = 25
         self.maxWP = 30
+        self.wpRegen = .01
         self.emp = 30
         self.maxEMP = 30
         self.ally = None
@@ -28,6 +29,8 @@ class Character(pygmi.Object):
         self.running = 0
         self.listRunClock = [0, 0, 0, 0]
         self.attacking = 0
+        self.guard = 25
+        self.maxGuard = 30
         self.guarding = 0
         self.moving = 0
         self.jumpRelease = 0
@@ -159,9 +162,10 @@ class Character(pygmi.Object):
         if key == K_k:
             if self.y == self.z:
                 if self.moving == 0:
-                    if self.attacking == 0:
+                    if self.attacking == 0 and self.wp >= 5:
                         self.boy['throw'].index = 0
                         self.throwAnim = 20
+                        self.wp -= 5
         if key == K_LSHIFT:
             if self.y == self.z and self.moving == 0 and self.attacking == 0:
                 self.boy['guard'].index = 0
@@ -314,7 +318,10 @@ class Character(pygmi.Object):
             self.shadow.x = self.x-19
         elif self._flipped_x == 1:
             self.shadow.x = self.x-15
-        print(self.y,self.bbox.bottom(),self.bbox.y)
+        if self.wp <= self.maxWP - self.wpRegen:
+            self.wp += self.wpRegen
+        if self.wp > self.maxWP - self.wpRegen:
+            self.wp = self.maxWP
 
 class HUD(pygmi.Object):
 
@@ -331,6 +338,7 @@ class HUD(pygmi.Object):
         self.sprEmpathyLine = pygmi.Sprite(self.assets.images["hud"]["empathyline.png"],348,8,0,0)
         self.sprEmpathyTwist = pygmi.Sprite(self.assets.images["hud"]["empathytwist.png"],46,56,0,0)
         self.sprEmpathyJewel = pygmi.Sprite(self.assets.images["hud"]["empathyjewel.png"],10,14,0,0)
+        self.sprGuard = pygmi.Sprite(self.assets.images["hud"]["guard.png"],46,16,0,0)
         self.sprClosed = pygmi.Sprite(self.assets.images["hud"]["closed.png"],62,22,0,0)
 
     def event_render(self):
@@ -341,6 +349,7 @@ class HUD(pygmi.Object):
         empathyLine = self.sprEmpathyLine.image
         empathyTwist = self.sprEmpathyTwist.image
         empathyJewel = self.sprEmpathyJewel.image
+        guard = self.sprGuard.image
         closed = self.sprClosed.image
         rectHeart = Rect(0,52-52*self.character.hp/self.character.maxHP,66,52)
         rectWillpower = Rect(338-338*self.character.wp/self.character.maxWP,0,338,8)
@@ -350,6 +359,7 @@ class HUD(pygmi.Object):
         if self.character.emp > .8*self.character.maxEMP:
             rectEmpathyLine = Rect(0,0,348,8)
             rectEmpathyTwist = Rect(0,56-56*(self.character.emp-self.character.maxEMP*.8)/(self.character.maxEMP*.2),46,56)
+        rectGuard = Rect (0,16-16*self.character.guard/self.character.maxGuard,46,16)
         self.window.blit(back,(self.x,self.y))
         self.window.blit(heart,(self.x+366,self.y+22+52-52*self.character.hp/self.character.maxHP),rectHeart)
         self.window.blit(willpower,(self.x+12+338-338*self.character.wp/self.character.maxWP,self.y+18),rectWillpower)
@@ -357,6 +367,7 @@ class HUD(pygmi.Object):
         self.window.blit(empathyTwist,(self.x+744,self.y+16+56-56*(self.character.emp-self.character.maxEMP*.8)/(self.character.maxEMP*.2)),rectEmpathyTwist)
         if self.character.emp == self.character.maxEMP:
             self.window.blit(empathyJewel,(self.x+762,self.y+26))
+        self.window.blit(guard,(self.x+376,self.y+8+16-16*self.character.guard/self.character.maxGuard),rectGuard)
         if self.character.ally == None:
             self.window.blit(closed,(self.x+620,self.y+46))
         self.window.blit(front,(self.x,self.y))
