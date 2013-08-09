@@ -284,7 +284,7 @@ class Character(pygmi.Object):
             self.datkAnim -= 1
             self.setSprite(self.boy['datk'])
         if self.throwAnim == 20:
-            oFlare = Flare(self.x,self.y-34,self._flipped_x)
+            oFlare = Flare(self.x,self.y-34,self._flipped_x,self)
             self.game.createInstance(oFlare)
         if self.throwAnim > 0:
             self.throwAnim -= 1

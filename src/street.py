@@ -12,7 +12,7 @@ class Street(pygmi.Room):
 
     def event_create(self):
         oShadowBoy = Shadow(pygmi.Sprite(self.assets.images["fx"]["shadowHuman.png"],34,10),100-19,400-6)
-        oBoy = Character(0,0,oShadowBoy,self.game)
+        oBoy = Character(100,400,oShadowBoy,self.game)
         oHUD = HUD(0,600-84,oBoy)
         oShadowApathol = Shadow(pygmi.Sprite(self.assets.images["fx"]["shadowApathol.png"],16,6),200-8,400)
         oApathol = Apathol(200,400,oShadowApathol)

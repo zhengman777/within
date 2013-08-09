@@ -21,7 +21,7 @@ class Hitbox(pygmi.Object):
         self.enemyList = []
         super().__init__(x,y)
         self.setSolid(True)
-        #self.setVisible(False)
+        self.setVisible(False)
 
     def event_create(self):
         htbxBoyPunch1 = pygmi.Sprite(self.assets.images["htbx"]["zPunch1.png"],17,14,0,0)
