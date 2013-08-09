@@ -560,7 +560,7 @@ class Object(object):
         if sprite and autobbox:
             self._b_x = x
             self._b_y = y
-            self.setBbox(x,y,sprite.w,sprite.h)
+            self.setBbox(sprite.x,sprite.y,sprite.w,sprite.h)
         self.setFlipped(tempFlip_x, tempFlip_y)
         self._drawchange = True
 

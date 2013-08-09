@@ -2,6 +2,7 @@ import pygmi, pygame
 from pygame.locals import *
 from universal import Hitbox
 from flare import Flare
+from enemy import Apathol
 
 class Character(pygmi.Object):
 
@@ -31,6 +32,7 @@ class Character(pygmi.Object):
         self.attacking = 0
         self.guard = 25
         self.maxGuard = 30
+        self.guardRegen = .01
         self.guarding = 0
         self.moving = 0
         self.jumpRelease = 0
@@ -206,7 +208,8 @@ class Character(pygmi.Object):
             self.jumpRelease = 1
 
     def event_collision(self,other):
-        print(self.y,self.bbox.bottom(),other.y,other.bbox.top())
+        if type(other) == Apathol and self.guarding == 0:
+            self.hp -= .05
 
     def update(self):
         keys = pygame.key.get_pressed()
@@ -286,13 +289,17 @@ class Character(pygmi.Object):
         if self.throwAnim > 0:
             self.throwAnim -= 1
             self.setSprite(self.boy['throw'])
-        if self.guarding == 1:
+        if self.guarding == 1 and self.guard >= .1:
             self.setSprite(self.boy['guard'])
+            self.guard -= .1
             if self.guardAnim > 0:
                 self.guardAnim -= 1
                 self.boy['guard'].index = 0
             if self.guardAnim == 0:
                 self.boy['guard'].index = 1
+        if self.guarding == 1 and self.guard < .1:
+            self.guarding = 0
+            self.guardAnim = 0
         for i in range(0,len(self.listRunClock)):
             if self.listRunClock[i] > 0:
                 self.listRunClock[i] -= 1
@@ -320,14 +327,18 @@ class Character(pygmi.Object):
             self.shadow.x = self.x-15
         if self.wp <= self.maxWP - self.wpRegen:
             self.wp += self.wpRegen
-        if self.wp > self.maxWP - self.wpRegen:
+        elif self.wp > self.maxWP - self.wpRegen:
             self.wp = self.maxWP
+        if self.guard <= self.maxGuard - self.guardRegen and self.guarding == 0:
+            self.guard += self.guardRegen
+        elif self.guard > self.maxGuard - self.guardRegen and self.guarding == 0:
+            self.guard = self.maxGuard
+
 
 class HUD(pygmi.Object):
 
     def __init__(self,x,y,character):
         self.character = character
-        #self.sprHP = pygmi.Sprite(pygmi.Tools.makeText(self.hp,None,None,None),0,0,0,0)
         super().__init__(x,y)
 
     def event_create(self):
@@ -370,4 +381,6 @@ class HUD(pygmi.Object):
         self.window.blit(guard,(self.x+376,self.y+8+16-16*self.character.guard/self.character.maxGuard),rectGuard)
         if self.character.ally == None:
             self.window.blit(closed,(self.x+620,self.y+46))
+        if self.character.guarding == 1:
+             self.window.blit(guard,(self.character.x-23,self.character.y-84+16-16*self.character.guard/self.character.maxGuard),rectGuard)
         self.window.blit(front,(self.x,self.y))

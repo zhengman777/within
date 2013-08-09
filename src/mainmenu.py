@@ -1,5 +1,5 @@
 import pygmi
-from menu import Button, PlayButton, QuitButton
+from menu import PlayButton, QuitButton
 
 class MainMenu(pygmi.Room):
 
