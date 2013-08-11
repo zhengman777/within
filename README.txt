@@ -5,10 +5,11 @@
 
 //Street
 - WASD to move
-- double-tap direction to run
+- double-tap move command to run
 - J to punch
 - J twice to enter a punch combo, requires correct timing
 - J while walking to kick
 - J while running to dash-attack
 - J while jumping to air-kick
 - K to shoot energy
+- hold LSHIFT to guard

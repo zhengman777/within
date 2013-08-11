@@ -288,7 +288,7 @@ class Room(object):
 
     def render(self):
         if self.background:
-            self.window.blit(self.background,(0,0))
+            self.window.blit(self.background,(-self.viewx,-self.viewy))
         else:
             self.window.fill(Pygmi.clrBlack)
         sort = False

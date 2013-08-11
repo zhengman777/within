@@ -53,7 +53,6 @@ class Hitbox(pygmi.Object):
             self.power = 8
 
     def event_collision(self,other):
-        print(other)
         if type(other) == Apathol:
             if other not in self.enemyList:
                 self.enemyList.append(other)

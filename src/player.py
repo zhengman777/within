@@ -216,7 +216,23 @@ class Character(pygmi.Object):
         self.attacking = (self.punch1Anim + self.punch2Anim + self.kickAnim + self.datkAnim
             + self.akickAnim + self.throwAnim + self.guarding)
         if keys[K_w] and self.dominantY != 2 and self.stillHolding[0] == 1 and self.attacking == 0:
-            self.ySpeed = -2
+            print(self.running,self.moving)
+            if self.z + self.ySpeed*self.runModifier > self.room.boundY_min:
+                self.ySpeed = -2
+            else:
+                if self.y < self.z:
+                    self.z = self.room.boundY_min
+                    self.ySpeed = 0
+                if self.y >= self.z:
+                    self.z = self.y = self.room.boundY_min
+                    self.ySpeed = 0
+                    self.moving = 0
+                    self.running = 0
+                    self.runModifier = 1
+                if self.moving == 0:
+                    self.setSprite(self.boy['idle'])
+            if self.y + self.ySpeed*self.runModifier < self.room.boundY_max:
+                pass
         if keys[K_s] and self.dominantY != 1 and self.stillHolding[1] == 1 and self.attacking == 0:
             self.ySpeed = 2
         if keys[K_a] and self.dominantX != 2 and self.stillHolding[2] == 1 and self.attacking == 0:
@@ -235,7 +251,8 @@ class Character(pygmi.Object):
                 self.xSpeed = 0
             if self.xSpeed == 0 and self.ySpeed == 0:
                 self.moving = 0
-            if self.moving == 0 and self.attacking == 0 and self.y == self.z:
+            if (self.moving == 0 and self.attacking == 0 and self.y == self.z and
+                    not (keys[K_a] or keys[K_d] or keys[K_w] or keys[K_s])):
                 self.setSprite(self.boy['idle'])
                 self.running = 0
             if self.running == 1 and self.datkAnim == 0:
@@ -277,8 +294,19 @@ class Character(pygmi.Object):
         if self.datkAnim > 6:
             self.datkAnim -= 1
             self.setSprite(self.boy['datk'])
-            self.move(self.xDashSpeed*self.runModifier,self.yDashSpeed*self.runModifier)
-            self.z += self.yDashSpeed*self.runModifier
+            if self.x + self.xDashSpeed*self.runModifier > self.room.boundX_max:
+                self.x = self.room.boundX_max
+            elif self.x + self.xDashSpeed*self.runModifier < self.room.boundX_min:
+                self.x = self.room.boundX_min
+            else:
+                self.move(self.xDashSpeed*self.runModifier,0)
+            if self.y + self.yDashSpeed*self.runModifier > self.room.boundY_max:
+                self.z = self.y = self.room.boundY_max
+            elif self.y + self.yDashSpeed*self.runModifier < self.room.boundY_min:
+                self.z = self.y = self.room.boundY_min
+            else:
+                self.move(0,self.yDashSpeed*self.runModifier)
+                self.z += self.yDashSpeed*self.runModifier
         elif self.datkAnim <= 6 and self.datkAnim > 0:
             self.runModifier = 1
             self.datkAnim -= 1
@@ -333,6 +361,7 @@ class Character(pygmi.Object):
             self.guard += self.guardRegen
         elif self.guard > self.maxGuard - self.guardRegen and self.guarding == 0:
             self.guard = self.maxGuard
+        #print(self.y,self.z)
 
 
 class HUD(pygmi.Object):

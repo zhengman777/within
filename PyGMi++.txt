@@ -1,3 +1,11 @@
+PyGMi 2.112 [2013-08-10]
+
+	Tweaks and fixes:
+
+		1) Bbox's automatic instantiation now creates the Bbox properly.
+
+		2) Room's background now moves with the room's view.
+
 PyGMi 2.111 [2013-06-27]
 
 	Tweaks and fixes:
