@@ -220,27 +220,54 @@ class Character(pygmi.Object):
             if self.z + self.ySpeed*self.runModifier > self.room.boundY_min:
                 self.ySpeed = -2
             else:
+                self.ySpeed = 0
                 if self.y < self.z:
                     self.z = self.room.boundY_min
-                    self.ySpeed = 0
                 if self.y >= self.z:
                     self.z = self.y = self.room.boundY_min
-                    self.ySpeed = 0
                     self.moving = 0
                     self.running = 0
                     self.runModifier = 1
                 if self.moving == 0:
                     self.setSprite(self.boy['idle'])
-            if self.y + self.ySpeed*self.runModifier < self.room.boundY_max:
-                pass
         if keys[K_s] and self.dominantY != 1 and self.stillHolding[1] == 1 and self.attacking == 0:
-            self.ySpeed = 2
+            if self.z + self.ySpeed*self.runModifier < self.room.boundY_max:
+                self.ySpeed = 2
+            else:
+                self.ySpeed = 0
+                if self.y < self.z:
+                    self.z = self.room.boundY_max
+                if self.y >= self.z:
+                    self.z = self.y = self.room.boundY_max
+                    self.moving = 0
+                    self.running = 0
+                    self.runModifier = 1
+                if self.moving == 0:
+                    self.setSprite(self.boy['idle'])
         if keys[K_a] and self.dominantX != 2 and self.stillHolding[2] == 1 and self.attacking == 0:
-            self.xSpeed = -3
-            self.x_scale = -1
+            if self.x + self.xSpeed*self.runModifier > self.room.boundX_min:
+                self.xSpeed = -3
+                self.x_scale = -1
+            else:
+                self.x = self.room.boundX_min
+                self.xSpeed = 0
+                if self.y >= self.z:
+                    self.moving = 0
+                    self.running = 0
+                    self.runModifier = 1
+                    self.setSprite(self.boy['idle'])
         if keys[K_d] and self.dominantX != 1 and self.stillHolding[3] == 1 and self.attacking == 0:
-            self.xSpeed = 3
-            self.x_scale = 1
+            if self.x + self.xSpeed*self.runModifier < self.room.boundX_max:
+                self.xSpeed = 3
+                self.x_scale = 1
+            else:
+                self.x = self.room.boundX_max
+                self.xSpeed = 0
+                if self.y >= self.z:
+                    self.moving = 0
+                    self.running = 0
+                    self.runModifier = 1
+                    self.setSprite(self.boy['idle'])
         self.moving = abs(self.xSpeed) + abs(self.ySpeed)
         if self.datkAnim == 0:
             if not (keys[K_a] or keys[K_d] or keys[K_w] or keys[K_s]) and self.y == self.z:
@@ -273,7 +300,7 @@ class Character(pygmi.Object):
         if self.punch2Anim > 0:
             self.punch2Anim -= 1
             self.setSprite(self.boy['punch2'])
-        if self.kickAnim == 24:
+        if self.kickAnim == 16:
             oHtbxKick = Hitbox(self.x+4*self.x_scale,self.y-32,"kick",self)
             self.game.createInstance(oHtbxKick)
             oHtbxKick.setFlipped(self._flipped_x,0)
@@ -361,7 +388,7 @@ class Character(pygmi.Object):
             self.guard += self.guardRegen
         elif self.guard > self.maxGuard - self.guardRegen and self.guarding == 0:
             self.guard = self.maxGuard
-        #print(self.y,self.z)
+        print(self.moving,self.xSpeed,self.ySpeed)
 
 
 class HUD(pygmi.Object):
@@ -411,5 +438,5 @@ class HUD(pygmi.Object):
         if self.character.ally == None:
             self.window.blit(closed,(self.x+620,self.y+46))
         if self.character.guarding == 1:
-             self.window.blit(guard,(self.character.x-23,self.character.y-84+16-16*self.character.guard/self.character.maxGuard),rectGuard)
+             self.window.blit(guard,(self.character.x-23-self.room.viewx,self.character.y-84+16-16*self.character.guard/self.character.maxGuard),rectGuard)
         self.window.blit(front,(self.x,self.y))
