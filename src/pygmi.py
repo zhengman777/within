@@ -1,8 +1,8 @@
 '''
 Created: 2013-05-09
-Updated: 2013-06-27
+Updated: 2013-08-10
 @author: Catt
-@version: 2.111
+@version: 2.112
 '''
 
 from collections import OrderedDict
