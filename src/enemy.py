@@ -21,7 +21,17 @@ class Enemy(pygmi.Object):
         if self.recoilAnim > 0:
             self.recoilAnim -= 1
         if self.recoilCounter > 0:
-            self.move(self.recoilDistance*self.recoilSide,0)
-            self.recoilCounter -= 1
+            if self.recoilSide == -1:
+                if self.x + self.recoilDistance*self.recoilSide > self.room.boundX_min:
+                    self.move(self.recoilDistance*self.recoilSide,0)
+                    self.recoilCounter -= 1
+                else:
+                    self.x = self.room.boundX_min
+            if self.recoilSide == 1:
+                if self.x + self.recoilDistance*self.recoilSide < self.room.boundX_max:
+                    self.move(self.recoilDistance*self.recoilSide,0)
+                    self.recoilCounter -= 1
+                else:
+                    self.x = self.room.boundX_max
         self.z = self.y
         self.setDepth(-self.z)

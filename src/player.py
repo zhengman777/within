@@ -46,7 +46,6 @@ class Character(Ally):
         self.akickAnim = 0
         self.throwAnim = 0
         self.guardAnim = 0
-        self.recoilAnim = 0
         super().__init__(x,y)
 
     def event_create(self):
