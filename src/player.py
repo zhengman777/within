@@ -2,16 +2,16 @@ import pygmi, pygame
 from pygame.locals import *
 from universal import Hitbox
 from flare import Flare
-from enemy import Apathol
+from enemies import Apathol
+from ally import Ally
 
-class Character(pygmi.Object):
+class Character(Ally):
 
     def __init__(self,x,y,shadow,game):
         self.game = game
         self.shadow = shadow
         self.xSpeed = 0
         self.ySpeed = 0
-        self.z = y
         self.x_scale = 1
         self.hp = 25
         self.maxHP = 30
@@ -46,8 +46,8 @@ class Character(pygmi.Object):
         self.akickAnim = 0
         self.throwAnim = 0
         self.guardAnim = 0
+        self.recoilAnim = 0
         super().__init__(x,y)
-        self.setSolid(True)
 
     def event_create(self):
         sprIdle = pygmi.Sprite(self.assets.images["char"]["boy_idle"],30,64,-18,-64)
@@ -208,15 +208,13 @@ class Character(pygmi.Object):
             self.jumpRelease = 1
 
     def event_collision(self,other):
-        if type(other) == Apathol and self.guarding == 0:
-            self.hp -= .05
+        pass
 
     def update(self):
         keys = pygame.key.get_pressed()
         self.attacking = (self.punch1Anim + self.punch2Anim + self.kickAnim + self.datkAnim
             + self.akickAnim + self.throwAnim + self.guarding)
         if keys[K_w] and self.dominantY != 2 and self.stillHolding[0] == 1 and self.attacking == 0:
-            print(self.running,self.moving)
             if self.z + self.ySpeed*self.runModifier > self.room.boundY_min:
                 self.ySpeed = -2
             else:
@@ -287,35 +285,35 @@ class Character(pygmi.Object):
             elif self.running == 0 and self.moving > 0:
                 self.setSprite(self.boy['walk'])
         if self.punch1Anim == 18:
-            oHtbxPunch1 = Hitbox(self.x+4*self.x_scale,self.y-44,"punch1",self)
+            oHtbxPunch1 = Hitbox(self.x+4*self.x_scale,self.y-44,"boy_punch1",self)
             self.game.createInstance(oHtbxPunch1)
             oHtbxPunch1.setFlipped(self._flipped_x,0)
         if self.punch1Anim > 0:
             self.punch1Anim -= 1
             self.setSprite(self.boy['punch1'])
         if self.punch2Anim == 24:
-            oHtbxPunch2 = Hitbox(self.x+4*self.x_scale,self.y-44,"punch2",self)
+            oHtbxPunch2 = Hitbox(self.x+4*self.x_scale,self.y-44,"boy_punch2",self)
             self.game.createInstance(oHtbxPunch2)
             oHtbxPunch2.setFlipped(self._flipped_x,0)
         if self.punch2Anim > 0:
             self.punch2Anim -= 1
             self.setSprite(self.boy['punch2'])
-        if self.kickAnim == 16:
-            oHtbxKick = Hitbox(self.x+4*self.x_scale,self.y-32,"kick",self)
+        if self.kickAnim == 18:
+            oHtbxKick = Hitbox(self.x+4*self.x_scale,self.y-32,"boy_kick",self)
             self.game.createInstance(oHtbxKick)
             oHtbxKick.setFlipped(self._flipped_x,0)
         if self.kickAnim > 0:
             self.kickAnim -= 1
             self.setSprite(self.boy['kick'])
         if self.akickAnim == 14:
-            oHtbxAkick = Hitbox(self.x+4*self.x_scale,self.y-30,"akick",self)
+            oHtbxAkick = Hitbox(self.x+4*self.x_scale,self.y-30,"boy_akick",self)
             self.game.createInstance(oHtbxAkick)
             oHtbxAkick.setFlipped(self._flipped_x,0)
         if self.akickAnim > 0:
             self.akickAnim -= 1
             self.setSprite(self.boy['akick'])
         if self.datkAnim == 21:
-            oHtbxDatk = Hitbox(self.x,self.y-30,"datk",self)
+            oHtbxDatk = Hitbox(self.x,self.y-30,"boy_datk",self)
             self.game.createInstance(oHtbxDatk)
             oHtbxDatk.setFlipped(self._flipped_x,0)
         if self.datkAnim > 6:
@@ -388,7 +386,6 @@ class Character(pygmi.Object):
             self.guard += self.guardRegen
         elif self.guard > self.maxGuard - self.guardRegen and self.guarding == 0:
             self.guard = self.maxGuard
-        print(self.moving,self.xSpeed,self.ySpeed)
 
 
 class HUD(pygmi.Object):
