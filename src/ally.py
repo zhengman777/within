@@ -1,15 +1,13 @@
 import pygmi
+from fighter import Fighter
 
-class Ally(pygmi.Object):
+class Ally(Fighter):
 
     def __init__(self,x,y):
         super().__init__(x,y)
-        self.z = y
-        self.recoilAnim = 0
-        self.setSolid(True)
 
     def event_create(self):
-        pass
+        super().event_create()
 
     def update(self):
-        pass
+        super().update()

@@ -13,6 +13,7 @@ class Character(Ally):
         self.xSpeed = 0
         self.ySpeed = 0
         self.x_scale = 1
+        self.weight = 1
         self.hp = 25
         self.maxHP = 30
         self.wp = 25
@@ -30,6 +31,7 @@ class Character(Ally):
         self.running = 0
         self.listRunClock = [0, 0, 0, 0]
         self.attacking = 0
+        self.recoilTime = 15
         self.guard = 25
         self.maxGuard = 30
         self.guardRegen = .01
@@ -72,112 +74,118 @@ class Character(Ally):
         sprThrow.setFrameTime(2)
         sprGuard = pygmi.Sprite(self.assets.images["char"]["boy_guard"],30,62,-18,-62)
         sprGuard.setFrameTime(0)
+        sprRecoilB = pygmi.Sprite(self.assets.images["char"]["boy_recoilb"],36,62,-16,-62)
+        sprRecoilB.setFrameTime(5)
+        sprRecoilF = pygmi.Sprite(self.assets.images["char"]["boy_recoilf"],36,64,-22,-64)
+        sprRecoilF.setFrameTime(5)
         self.boy = {'idle':sprIdle,'walk':sprWalk,'run':sprRun,'punch1':sprPunch1,
                     'punch2':sprPunch2,'kick':sprKick,'datk':sprDatk,'jump':sprJump,
-                    'land':sprLand,'akick':sprAkick,'throw':sprThrow,'guard':sprGuard}
+                    'land':sprLand,'akick':sprAkick,'throw':sprThrow,'guard':sprGuard,
+                    'recoilb':sprRecoilB,'recoilf':sprRecoilF}
 
     def event_keyPressed(self,key):
-        if key == K_w:
-            self.dominantY = 1
-            self.stillHolding[0] = 1
-            if self.listRunClock[0] > 0 and self.attacking == 0:
-                self.running = 1
-                self.runModifier = 2
-                self.listRunClock[0:3] = [0]*4
-        if key == K_s:
-            self.dominantY = 2
-            self.stillHolding[1] = 1
-            if self.listRunClock[1] > 0 and self.attacking == 0:
-                self.running = 1
-                self.runModifier = 2
-                self.listRunClock[0:3] = [0]*4
-        if key == K_a:
-            self.dominantX = 1
-            self.stillHolding[2] = 1
-            if self.listRunClock[2] > 0 and self.attacking == 0:
-                self.running = 1
-                self.runModifier = 2
-                self.listRunClock[0:3] = [0]*4
-        if key == K_d:
-            self.dominantX = 2
-            self.stillHolding[3] = 1
-            if self.listRunClock[3] > 0 and self.attacking == 0:
-                self.running = 1
-                self.runModifier = 2
-                self.listRunClock[0:3] = [0]*4
-        if key == K_w and self.dominantY != 2 and self.attacking == 0:
-            if self.running == 0:
-                self.boy['walk'].index = 0
-            elif self.running == 1:
-                self.boy['run'].index = 0
-        if key == K_s and self.dominantY != 1 and self.attacking == 0:
-            if self.running == 0:
-                self.boy['walk'].index = 0
-            elif self.running == 1:
-                self.boy['run'].index = 0
-        if key == K_a and self.dominantX != 2:
-            self.x_scale = -1
-            self.setFlipped(1,0)
-            if self.attacking == 0:
+        if self.recoilAnim == 0:
+            if key == K_w:
+                self.dominantY = 1
+                self.stillHolding[0] = 1
+                if self.listRunClock[0] > 0 and self.attacking == 0:
+                    self.running = 1
+                    self.runModifier = 2
+                    self.listRunClock[0:3] = [0]*4
+            if key == K_s:
+                self.dominantY = 2
+                self.stillHolding[1] = 1
+                if self.listRunClock[1] > 0 and self.attacking == 0:
+                    self.running = 1
+                    self.runModifier = 2
+                    self.listRunClock[0:3] = [0]*4
+            if key == K_a:
+                self.dominantX = 1
+                self.stillHolding[2] = 1
+                if self.listRunClock[2] > 0 and self.attacking == 0:
+                    self.running = 1
+                    self.runModifier = 2
+                    self.listRunClock[0:3] = [0]*4
+            if key == K_d:
+                self.dominantX = 2
+                self.stillHolding[3] = 1
+                if self.listRunClock[3] > 0 and self.attacking == 0:
+                    self.running = 1
+                    self.runModifier = 2
+                    self.listRunClock[0:3] = [0]*4
+            if key == K_w and self.dominantY != 2 and self.attacking == 0:
                 if self.running == 0:
                     self.boy['walk'].index = 0
                 elif self.running == 1:
                     self.boy['run'].index = 0
-        if key == K_d and self.dominantX != 1:
-            self.x_scale = 1
-            self.setFlipped(0,0)
-            if self.attacking == 0:
+            if key == K_s and self.dominantY != 1 and self.attacking == 0:
                 if self.running == 0:
                     self.boy['walk'].index = 0
                 elif self.running == 1:
                     self.boy['run'].index = 0
-        if key == K_j:
-            if self.z == self.y:
-                if self.moving == 0:
-                    if self.attacking == 0:
-                        self.boy['punch1'].index = 0
-                        self.punch1Anim = 18
-                    if self.punch2Anim == 0 and self.punch1Anim <= 8 and self.punch1Anim > 0:
-                        self.boy['punch2'].index = 0
-                        self.punch2Anim = 24
-                        self.punch1Anim = 0
-                elif self.running == 1:
-                    if self.attacking == 0:
-                        self.boy['datk'].index = 0
-                        self.datkAnim = 21
-                        self.xDashSpeed = self.xSpeed
-                        self.yDashSpeed = self.ySpeed
-                        self.xSpeed = 0
-                        self.ySpeed = 0
-                        self.running = 0
-                elif self.moving != 0 and self.running == 0:
-                    if self.attacking == 0:
-                        self.boy['kick'].index = 0
-                        self.kickAnim = 24
-                        self.xSpeed = 0
-                        self.ySpeed = 0
-            elif self.y < self.z:
+            if key == K_a and self.dominantX != 2:
+                self.x_scale = -1
+                self.setFlipped(1,0)
                 if self.attacking == 0:
-                    self.boy['akick'].index = 0
-                    self.akickAnim = 14
-        if key == K_k:
-            if self.y == self.z:
-                if self.moving == 0:
-                    if self.attacking == 0 and self.wp >= 5:
-                        self.boy['throw'].index = 0
-                        self.throwAnim = 20
-                        self.wp -= 5
-        if key == K_LSHIFT:
-            if self.y == self.z and self.moving == 0 and self.attacking == 0:
-                self.boy['guard'].index = 0
-                self.guarding = 1
-                self.guardAnim = 6
-        if key == K_SPACE and self.attacking == 0:
-            if self.y == self.z:
-                self.jumpRelease = 0
-                self.jumpSpeed = self.maxJumpSpeed
-                self.move(0,-self.jumpSpeed)
-                self.boy['jump'].index = 0
+                    if self.running == 0:
+                        self.boy['walk'].index = 0
+                    elif self.running == 1:
+                        self.boy['run'].index = 0
+            if key == K_d and self.dominantX != 1:
+                self.x_scale = 1
+                self.setFlipped(0,0)
+                if self.attacking == 0:
+                    if self.running == 0:
+                        self.boy['walk'].index = 0
+                    elif self.running == 1:
+                        self.boy['run'].index = 0
+            if key == K_j:
+                if self.z == self.y:
+                    if self.moving == 0:
+                        if self.attacking == 0:
+                            self.boy['punch1'].index = 0
+                            self.punch1Anim = 18
+                        if self.punch2Anim == 0 and self.punch1Anim <= 8 and self.punch1Anim > 0:
+                            self.boy['punch2'].index = 0
+                            self.punch2Anim = 24
+                            self.punch1Anim = 0
+                    elif self.running == 1:
+                        if self.attacking == 0:
+                            self.boy['datk'].index = 0
+                            self.datkAnim = 21
+                            self.xDashSpeed = self.xSpeed
+                            self.yDashSpeed = self.ySpeed
+                            self.xSpeed = 0
+                            self.ySpeed = 0
+                            self.running = 0
+                    elif self.moving != 0 and self.running == 0:
+                        if self.attacking == 0:
+                            self.boy['kick'].index = 0
+                            self.kickAnim = 24
+                            self.xSpeed = 0
+                            self.ySpeed = 0
+                elif self.y < self.z:
+                    if self.attacking == 0:
+                        self.boy['akick'].index = 0
+                        self.akickAnim = 14
+            if key == K_k:
+                if self.y == self.z:
+                    if self.moving == 0:
+                        if self.attacking == 0 and self.wp >= 5:
+                            self.boy['throw'].index = 0
+                            self.throwAnim = 20
+                            self.wp -= 5
+            if key == K_LSHIFT:
+                if self.y == self.z and self.moving == 0 and self.attacking == 0:
+                    self.boy['guard'].index = 0
+                    self.guarding = 1
+                    self.guardAnim = 6
+            if key == K_SPACE and self.attacking == 0:
+                if self.y == self.z:
+                    self.jumpRelease = 0
+                    self.jumpSpeed = self.maxJumpSpeed
+                    self.move(0,-self.jumpSpeed)
+                    self.boy['jump'].index = 0
 
     def event_keyReleased(self,key):
         if key == K_w:
@@ -213,162 +221,182 @@ class Character(Ally):
         keys = pygame.key.get_pressed()
         self.attacking = (self.punch1Anim + self.punch2Anim + self.kickAnim + self.datkAnim
             + self.akickAnim + self.throwAnim + self.guarding)
-        if keys[K_w] and self.dominantY != 2 and self.stillHolding[0] == 1 and self.attacking == 0:
-            if self.z + self.ySpeed*self.runModifier > self.room.boundY_min:
-                self.ySpeed = -2
-            else:
-                self.ySpeed = 0
-                if self.y < self.z:
-                    self.z = self.room.boundY_min
-                if self.y >= self.z:
-                    self.z = self.y = self.room.boundY_min
-                    self.moving = 0
-                    self.running = 0
-                    self.runModifier = 1
-                if self.moving == 0:
-                    self.setSprite(self.boy['idle'])
-        if keys[K_s] and self.dominantY != 1 and self.stillHolding[1] == 1 and self.attacking == 0:
-            if self.z + self.ySpeed*self.runModifier < self.room.boundY_max:
-                self.ySpeed = 2
-            else:
-                self.ySpeed = 0
-                if self.y < self.z:
-                    self.z = self.room.boundY_max
-                if self.y >= self.z:
-                    self.z = self.y = self.room.boundY_max
-                    self.moving = 0
-                    self.running = 0
-                    self.runModifier = 1
-                if self.moving == 0:
-                    self.setSprite(self.boy['idle'])
-        if keys[K_a] and self.dominantX != 2 and self.stillHolding[2] == 1 and self.attacking == 0:
-            if self.x + self.xSpeed*self.runModifier > self.room.boundX_min:
-                self.xSpeed = -3
-                self.x_scale = -1
-            else:
-                self.x = self.room.boundX_min
-                self.xSpeed = 0
-                if self.y >= self.z:
-                    self.moving = 0
-                    self.running = 0
-                    self.runModifier = 1
-                    self.setSprite(self.boy['idle'])
-        if keys[K_d] and self.dominantX != 1 and self.stillHolding[3] == 1 and self.attacking == 0:
-            if self.x + self.xSpeed*self.runModifier < self.room.boundX_max:
-                self.xSpeed = 3
-                self.x_scale = 1
-            else:
-                self.x = self.room.boundX_max
-                self.xSpeed = 0
-                if self.y >= self.z:
-                    self.moving = 0
-                    self.running = 0
-                    self.runModifier = 1
-                    self.setSprite(self.boy['idle'])
+        if self.recoilAnim == 0 and self.attacking ==0:
+            if keys[K_w] and self.dominantY != 2 and self.stillHolding[0] == 1:
+                if self.z + self.ySpeed*self.runModifier > self.room.boundY_min:
+                    self.ySpeed = -2
+                else:
+                    self.ySpeed = 0
+                    if self.y < self.z:
+                        self.z = self.room.boundY_min
+                    if self.y >= self.z:
+                        self.z = self.y = self.room.boundY_min
+                        self.moving = 0
+                        self.running = 0
+                        self.runModifier = 1
+                    if self.moving == 0:
+                        self.setSprite(self.boy['idle'])
+            if keys[K_s] and self.dominantY != 1 and self.stillHolding[1] == 1:
+                if self.z + self.ySpeed*self.runModifier < self.room.boundY_max:
+                    self.ySpeed = 2
+                else:
+                    self.ySpeed = 0
+                    if self.y < self.z:
+                        self.z = self.room.boundY_max
+                    if self.y >= self.z:
+                        self.z = self.y = self.room.boundY_max
+                        self.moving = 0
+                        self.running = 0
+                        self.runModifier = 1
+                    if self.moving == 0:
+                        self.setSprite(self.boy['idle'])
+            if keys[K_a] and self.dominantX != 2 and self.stillHolding[2] == 1:
+                if self.x + self.xSpeed*self.runModifier > self.room.boundX_min:
+                    self.xSpeed = -3
+                    self.x_scale = -1
+                else:
+                    self.x = self.room.boundX_min
+                    self.xSpeed = 0
+                    if self.y >= self.z:
+                        self.moving = 0
+                        self.running = 0
+                        self.runModifier = 1
+                        self.setSprite(self.boy['idle'])
+            if keys[K_d] and self.dominantX != 1 and self.stillHolding[3] == 1:
+                if self.x + self.xSpeed*self.runModifier < self.room.boundX_max:
+                    self.xSpeed = 3
+                    self.x_scale = 1
+                else:
+                    self.x = self.room.boundX_max
+                    self.xSpeed = 0
+                    if self.y >= self.z:
+                        self.moving = 0
+                        self.running = 0
+                        self.runModifier = 1
+                        self.setSprite(self.boy['idle'])
         self.moving = abs(self.xSpeed) + abs(self.ySpeed)
-        if self.datkAnim == 0:
-            if not (keys[K_a] or keys[K_d] or keys[K_w] or keys[K_s]) and self.y == self.z:
+        if self.recoilAnim == 0:
+            if self.datkAnim == 0:
+                if not (keys[K_a] or keys[K_d] or keys[K_w] or keys[K_s]) and self.y == self.z:
+                    self.runModifier = 1
+                if self.stillHolding[0] == 0 and self.stillHolding[1] == 0:
+                    self.ySpeed = 0
+                if self.stillHolding[2] == 0 and self.stillHolding[3] == 0:
+                    self.xSpeed = 0
+                if self.xSpeed == 0 and self.ySpeed == 0:
+                    self.moving = 0
+                if (self.moving == 0 and self.attacking == 0 and self.y == self.z and
+                        not (keys[K_a] or keys[K_d] or keys[K_w] or keys[K_s])):
+                    self.setSprite(self.boy['idle'])
+                    self.running = 0
+                if self.running == 1 and self.datkAnim == 0:
+                    self.setSprite(self.boy['run'])
+                elif self.running == 0 and self.moving > 0:
+                    self.setSprite(self.boy['walk'])
+            if self.punch1Anim == 18:
+                oHtbxPunch1 = Hitbox(self.x+4*self.x_scale,self.y-44,"boy_punch1",self)
+                self.game.createInstance(oHtbxPunch1)
+                oHtbxPunch1.setFlipped(self._flipped_x,0)
+            if self.punch1Anim > 0:
+                self.punch1Anim -= 1
+                self.setSprite(self.boy['punch1'])
+            if self.punch2Anim == 24:
+                oHtbxPunch2 = Hitbox(self.x+4*self.x_scale,self.y-44,"boy_punch2",self)
+                self.game.createInstance(oHtbxPunch2)
+                oHtbxPunch2.setFlipped(self._flipped_x,0)
+            if self.punch2Anim > 0:
+                self.punch2Anim -= 1
+                self.setSprite(self.boy['punch2'])
+            if self.kickAnim == 18:
+                oHtbxKick = Hitbox(self.x+4*self.x_scale,self.y-32,"boy_kick",self)
+                self.game.createInstance(oHtbxKick)
+                oHtbxKick.setFlipped(self._flipped_x,0)
+            if self.kickAnim > 0:
+                self.kickAnim -= 1
+                self.setSprite(self.boy['kick'])
+            if self.akickAnim == 14:
+                oHtbxAkick = Hitbox(self.x+4*self.x_scale,self.y-30,"boy_akick",self)
+                self.game.createInstance(oHtbxAkick)
+                oHtbxAkick.setFlipped(self._flipped_x,0)
+            if self.akickAnim > 0:
+                self.akickAnim -= 1
+                self.setSprite(self.boy['akick'])
+            if self.datkAnim == 21:
+                oHtbxDatk = Hitbox(self.x,self.y-30,"boy_datk",self)
+                self.game.createInstance(oHtbxDatk)
+                oHtbxDatk.setFlipped(self._flipped_x,0)
+            if self.datkAnim > 6:
+                self.datkAnim -= 1
+                self.setSprite(self.boy['datk'])
+                if self.x + self.xDashSpeed*self.runModifier > self.room.boundX_max:
+                    self.x = self.room.boundX_max
+                elif self.x + self.xDashSpeed*self.runModifier < self.room.boundX_min:
+                    self.x = self.room.boundX_min
+                else:
+                    self.move(self.xDashSpeed*self.runModifier,0)
+                if self.y + self.yDashSpeed*self.runModifier > self.room.boundY_max:
+                    self.z = self.y = self.room.boundY_max
+                elif self.y + self.yDashSpeed*self.runModifier < self.room.boundY_min:
+                    self.z = self.y = self.room.boundY_min
+                else:
+                    self.move(0,self.yDashSpeed*self.runModifier)
+                    self.z += self.yDashSpeed*self.runModifier
+            elif self.datkAnim <= 6 and self.datkAnim > 0:
                 self.runModifier = 1
-            if self.stillHolding[0] == 0 and self.stillHolding[1] == 0:
-                self.ySpeed = 0
-            if self.stillHolding[2] == 0 and self.stillHolding[3] == 0:
-                self.xSpeed = 0
-            if self.xSpeed == 0 and self.ySpeed == 0:
-                self.moving = 0
-            if (self.moving == 0 and self.attacking == 0 and self.y == self.z and
-                    not (keys[K_a] or keys[K_d] or keys[K_w] or keys[K_s])):
-                self.setSprite(self.boy['idle'])
-                self.running = 0
-            if self.running == 1 and self.datkAnim == 0:
-                self.setSprite(self.boy['run'])
-            elif self.running == 0 and self.moving > 0:
-                self.setSprite(self.boy['walk'])
-        if self.punch1Anim == 18:
-            oHtbxPunch1 = Hitbox(self.x+4*self.x_scale,self.y-44,"boy_punch1",self)
-            self.game.createInstance(oHtbxPunch1)
-            oHtbxPunch1.setFlipped(self._flipped_x,0)
-        if self.punch1Anim > 0:
-            self.punch1Anim -= 1
-            self.setSprite(self.boy['punch1'])
-        if self.punch2Anim == 24:
-            oHtbxPunch2 = Hitbox(self.x+4*self.x_scale,self.y-44,"boy_punch2",self)
-            self.game.createInstance(oHtbxPunch2)
-            oHtbxPunch2.setFlipped(self._flipped_x,0)
-        if self.punch2Anim > 0:
-            self.punch2Anim -= 1
-            self.setSprite(self.boy['punch2'])
-        if self.kickAnim == 18:
-            oHtbxKick = Hitbox(self.x+4*self.x_scale,self.y-32,"boy_kick",self)
-            self.game.createInstance(oHtbxKick)
-            oHtbxKick.setFlipped(self._flipped_x,0)
-        if self.kickAnim > 0:
-            self.kickAnim -= 1
-            self.setSprite(self.boy['kick'])
-        if self.akickAnim == 14:
-            oHtbxAkick = Hitbox(self.x+4*self.x_scale,self.y-30,"boy_akick",self)
-            self.game.createInstance(oHtbxAkick)
-            oHtbxAkick.setFlipped(self._flipped_x,0)
-        if self.akickAnim > 0:
-            self.akickAnim -= 1
-            self.setSprite(self.boy['akick'])
-        if self.datkAnim == 21:
-            oHtbxDatk = Hitbox(self.x,self.y-30,"boy_datk",self)
-            self.game.createInstance(oHtbxDatk)
-            oHtbxDatk.setFlipped(self._flipped_x,0)
-        if self.datkAnim > 6:
-            self.datkAnim -= 1
-            self.setSprite(self.boy['datk'])
-            if self.x + self.xDashSpeed*self.runModifier > self.room.boundX_max:
-                self.x = self.room.boundX_max
-            elif self.x + self.xDashSpeed*self.runModifier < self.room.boundX_min:
-                self.x = self.room.boundX_min
-            else:
-                self.move(self.xDashSpeed*self.runModifier,0)
-            if self.y + self.yDashSpeed*self.runModifier > self.room.boundY_max:
-                self.z = self.y = self.room.boundY_max
-            elif self.y + self.yDashSpeed*self.runModifier < self.room.boundY_min:
-                self.z = self.y = self.room.boundY_min
-            else:
-                self.move(0,self.yDashSpeed*self.runModifier)
-                self.z += self.yDashSpeed*self.runModifier
-        elif self.datkAnim <= 6 and self.datkAnim > 0:
-            self.runModifier = 1
-            self.datkAnim -= 1
-            self.setSprite(self.boy['datk'])
-        if self.throwAnim == 20:
-            oFlare = Flare(self.x,self.y-34,self._flipped_x,self)
-            self.game.createInstance(oFlare)
-        if self.throwAnim > 0:
-            self.throwAnim -= 1
-            self.setSprite(self.boy['throw'])
-        if self.guarding == 1 and self.guard >= .1:
-            self.setSprite(self.boy['guard'])
-            self.guard -= .1
-            if self.guardAnim > 0:
-                self.guardAnim -= 1
-                self.boy['guard'].index = 0
-            if self.guardAnim == 0:
-                self.boy['guard'].index = 1
-        if self.guarding == 1 and self.guard < .1:
-            self.guarding = 0
-            self.guardAnim = 0
+                self.datkAnim -= 1
+                self.setSprite(self.boy['datk'])
+            if self.throwAnim == 20:
+                oFlare = Flare(self.x,self.y-34,self._flipped_x,self)
+                self.game.createInstance(oFlare)
+            if self.throwAnim > 0:
+                self.throwAnim -= 1
+                self.setSprite(self.boy['throw'])
+            if self.guarding == 1 and self.guard >= .1:
+                self.setSprite(self.boy['guard'])
+                self.guard -= .1
+                if self.guardAnim > 0:
+                    self.guardAnim -= 1
+                    self.boy['guard'].index = 0
+                if self.guardAnim == 0:
+                    self.boy['guard'].index = 1
+            if self.guarding == 1 and self.guard < .1:
+                self.guarding = 0
+                self.guardAnim = 0
         for i in range(0,len(self.listRunClock)):
             if self.listRunClock[i] > 0:
                 self.listRunClock[i] -= 1
         if self.y < self.z:
             self.jumpSpeed -= self.gravity
             self.move(0,-self.jumpSpeed)
-            if self.jumpSpeed >= 0 and self.attacking == 0:
-                self.setSprite(self.boy['jump'])
-                if self.boy['jump'].index == 5:
-                    self.boy['jump'].index = 4
-            elif self.jumpSpeed < 0 and self.attacking == 0:
-                self.setSprite(self.boy['land'])
+            if self.recoilAnim == 0 and self.attacking == 0:
+                if self.jumpSpeed >= 0:
+                    self.setSprite(self.boy['jump'])
+                    if self.boy['jump'].index == 5:
+                        self.boy['jump'].index = 4
+                elif self.jumpSpeed < 0:
+                    self.setSprite(self.boy['land'])
         if self.y > self.z:
             self.y = self.z
             self.aKickAnim = 0
         if keys[K_SPACE] and self.jumpRelease == 0 and self.jumpSpeed > 0:
             self.jumpSpeed += .125
+        if self.recoilAnim == self.recoilTime:
+            if self.recoilSide == 1:
+                self.boy['recoilf'].index = 0
+            if self.recoilSide == -1:
+                self.boy['recoilb'].index = 0
+        if self.recoilAnim > 0:
+            if (self.recoilSide == 1 and self._flipped_x == 0) or (self.recoilSide == -1 and self._flipped_x == 1):
+                self.setSprite(self.boy['recoilf'])
+            if (self.recoilSide == -1 and self._flipped_x == 0) or (self.recoilSide == 1 and self._flipped_x == 1):
+                self.setSprite(self.boy['recoilb'])
+            self.punch1Anim = 0
+            self.punch2Anim = 0
+            self.kickAnim = 0
+            self.datkAnim = 0
+            self.akickAnim = 0
+            self.throwAnim = 0
+            self.guardAnim = 0
         self.move(self.xSpeed*self.runModifier,self.ySpeed*self.runModifier)
         self.z += self.ySpeed*self.runModifier
         self.setDepth(-self.z)
@@ -385,6 +413,7 @@ class Character(Ally):
             self.guard += self.guardRegen
         elif self.guard > self.maxGuard - self.guardRegen and self.guarding == 0:
             self.guard = self.maxGuard
+        super().update()
 
 
 class HUD(pygmi.Object):

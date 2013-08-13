@@ -6,7 +6,7 @@ class Apathol(Enemy):
 
     def __init__(self,x,y,shadow):
         self.hp = 30
-        self.timer = 300
+        self.timer = 100
         self.recoilTime = 12
         self.atkAnim = 0
         self.weight = 1
@@ -27,12 +27,13 @@ class Apathol(Enemy):
         if self.timer > 0:
             self.timer -= 1
         if self.timer == 0 and self.recoilAnim == 0:
-            self.timer = 300
+            self.timer = 100
             self.atkAnim = 44
         if self.recoilAnim == 0:
             if self.atkAnim == 36:
                 oHtbxAtk = Hitbox(self.x-16,self.y-46,'apathol_atk',self)
                 self.game.createInstance(oHtbxAtk)
+                oHtbxAtk.setFlipped(self._flipped_x,0)
             if self.atkAnim > 0:
                 self.atkAnim -= 1
                 self.setSprite(self.apathol['atk'])
