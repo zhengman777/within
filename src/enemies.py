@@ -14,6 +14,7 @@ class Apathol(Enemy):
         self.shadow = shadow
         self.z = y
         super().__init__(x,y)
+        self.alpha = 255
 
     def event_create(self):
         sprSpawn = pygmi.Sprite(self.assets.images["enemy"]["apathol_spawn"],40,38,-24,-48)
@@ -24,7 +25,10 @@ class Apathol(Enemy):
         sprRecoil.setFrameTime(4)
         sprAtk = pygmi.Sprite(self.assets.images["enemy"]["apathol_atk"],32,32,-16,-46)
         sprAtk.setFrameTime(4)
-        self.apathol = {'idle':sprIdle,'recoil':sprRecoil,'atk':sprAtk,'spawn':sprSpawn}
+        sprDeath = pygmi.Sprite(self.assets.images["enemy"]["apathol_death"],40,38,-24,-48)
+        sprDeath.setFrameTime(6)
+        self.apathol = {'idle':sprIdle,'recoil':sprRecoil,'atk':sprAtk,'spawn':sprSpawn,
+                'death':sprDeath}
 
     def update(self):
         if self.dead == 0:
@@ -54,9 +58,12 @@ class Apathol(Enemy):
         if self.hp <= 0:
             if self.dead == 0:
                 self.dead = 1
-                self.deathAnim = 10
+                self.deathAnim = 24
             if self.deathAnim > 0:
                 self.deathAnim -= 1
+                self.setSprite(self.apathol['death'])
+                self.alpha -= 10
+                self.sprite.setAlpha(self.alpha)
             if self.deathAnim == 0 and self.dead == 1:
                 self.destroy()
                 self.shadow.destroy()

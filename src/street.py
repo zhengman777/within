@@ -38,5 +38,3 @@ class Street(pygmi.Room):
             self.game.createInstance(self.oApathol)
             self.game.createInstance(self.oShadowApathol)
             self.enemyCount += 1
-            print(self.oApathol)
-        print(self.enemyCount)

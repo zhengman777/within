@@ -69,7 +69,7 @@ class Hitbox(pygmi.Object):
             self.type = 'bi'
 
     def event_collision(self,other):
-        if isinstance(other, Enemy) and isinstance(self.owner, Ally):
+        if isinstance(other, Enemy) and isinstance(self.owner, Ally) and other.dead == 0:
             if other not in self.enemyList:
                 self.enemyList.append(other)
                 other.recoilAnim = other.recoilTime
@@ -81,7 +81,7 @@ class Hitbox(pygmi.Object):
                         other.recoilSide = -1
                 other.recoilCounter = 4
                 other.recoilDistance = self.power/other.weight
-        if isinstance(other, Ally) and isinstance(self.owner, Enemy):
+        if isinstance(other, Ally) and isinstance(self.owner, Enemy) and other.dead == 0:
             if other not in self.allyList:
                 if other.guarding == 0:
                     self.allyList.append(other)

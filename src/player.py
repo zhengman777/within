@@ -14,7 +14,7 @@ class Character(Ally):
         self.ySpeed = 0
         self.x_scale = 1
         self.weight = 1
-        self.hp = 25
+        self.hp = 1
         self.maxHP = 30
         self.wp = 25
         self.maxWP = 30
@@ -78,10 +78,12 @@ class Character(Ally):
         sprRecoilB.setFrameTime(5)
         sprRecoilF = pygmi.Sprite(self.assets.images["char"]["boy_recoilf"],36,64,-16,-64)
         sprRecoilF.setFrameTime(5)
+        sprDeath = pygmi.Sprite(self.assets.images["char"]["boy_death"],68,64,-18,-64)
+        sprDeath.setFrameTime(8)
         self.boy = {'idle':sprIdle,'walk':sprWalk,'run':sprRun,'punch1':sprPunch1,
                     'punch2':sprPunch2,'kick':sprKick,'datk':sprDatk,'jump':sprJump,
                     'land':sprLand,'akick':sprAkick,'throw':sprThrow,'guard':sprGuard,
-                    'recoilb':sprRecoilB,'recoilf':sprRecoilF}
+                    'recoilb':sprRecoilB,'recoilf':sprRecoilF,'death':sprDeath}
 
     def event_keyPressed(self,key):
         if self.recoilAnim == 0 and self.dead == 0:
@@ -397,6 +399,19 @@ class Character(Ally):
             self.akickAnim = 0
             self.throwAnim = 0
             self.guardAnim = 0
+        if self.hp <= 0:
+            if self.dead == 0:
+                self.dead = 1
+                self.deathAnim = 88
+                self.xSpeed = 0
+                self.ySpeed = 0
+            if self.z == self.y:
+                if self.deathAnim > 0:
+                    self.deathAnim -= 1
+                if self.deathAnim == 0:
+                    self.boy['death'].index = 80
+                    print(self.sprite.index)
+                self.setSprite(self.boy['death'])
         self.move(self.xSpeed*self.runModifier,self.ySpeed*self.runModifier)
         self.z += self.ySpeed*self.runModifier
         self.setDepth(-self.z)
