@@ -74,9 +74,9 @@ class Character(Ally):
         sprThrow.setFrameTime(2)
         sprGuard = pygmi.Sprite(self.assets.images["char"]["boy_guard"],30,62,-18,-62)
         sprGuard.setFrameTime(0)
-        sprRecoilB = pygmi.Sprite(self.assets.images["char"]["boy_recoilb"],36,62,-16,-62)
+        sprRecoilB = pygmi.Sprite(self.assets.images["char"]["boy_recoilb"],36,62,-22,-62)
         sprRecoilB.setFrameTime(5)
-        sprRecoilF = pygmi.Sprite(self.assets.images["char"]["boy_recoilf"],36,64,-22,-64)
+        sprRecoilF = pygmi.Sprite(self.assets.images["char"]["boy_recoilf"],36,64,-16,-64)
         sprRecoilF.setFrameTime(5)
         self.boy = {'idle':sprIdle,'walk':sprWalk,'run':sprRun,'punch1':sprPunch1,
                     'punch2':sprPunch2,'kick':sprKick,'datk':sprDatk,'jump':sprJump,
@@ -84,7 +84,7 @@ class Character(Ally):
                     'recoilb':sprRecoilB,'recoilf':sprRecoilF}
 
     def event_keyPressed(self,key):
-        if self.recoilAnim == 0:
+        if self.recoilAnim == 0 and self.dead == 0:
             if key == K_w:
                 self.dominantY = 1
                 self.stillHolding[0] = 1
@@ -221,7 +221,7 @@ class Character(Ally):
         keys = pygame.key.get_pressed()
         self.attacking = (self.punch1Anim + self.punch2Anim + self.kickAnim + self.datkAnim
             + self.akickAnim + self.throwAnim + self.guarding)
-        if self.recoilAnim == 0 and self.attacking ==0:
+        if self.recoilAnim == 0 and self.attacking == 0 and self.dead == 0:
             if keys[K_w] and self.dominantY != 2 and self.stillHolding[0] == 1:
                 if self.z + self.ySpeed*self.runModifier > self.room.boundY_min:
                     self.ySpeed = -2

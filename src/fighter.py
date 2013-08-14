@@ -8,6 +8,8 @@ class Fighter(pygmi.Object):
         self.recoilSide = 0
         self.recoilCounter = 0
         self.recoilDistance = 0
+        self.dead = 0
+        self.deathAnim = 0
         super().__init__(x,y)
         self.setSolid(True)
 
