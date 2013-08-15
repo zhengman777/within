@@ -12,4 +12,6 @@
 - J while running to dash-attack
 - J while jumping to air-kick
 - K to shoot energy
+	- this consumes the Willpower Bar
 - hold LSHIFT to guard
+	- this consumes the Guard Bar

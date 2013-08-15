@@ -14,7 +14,7 @@ class Character(Ally):
         self.ySpeed = 0
         self.x_scale = 1
         self.weight = 1
-        self.hp = 1
+        self.hp = 25
         self.maxHP = 30
         self.wp = 25
         self.maxWP = 30
@@ -80,6 +80,7 @@ class Character(Ally):
         sprRecoilF.setFrameTime(5)
         sprDeath = pygmi.Sprite(self.assets.images["char"]["boy_death"],68,64,-18,-64)
         sprDeath.setFrameTime(8)
+        self.sprShadowLoss = pygmi.Sprite(self.assets.images["char"]["boy_shadowloss.png"],70,10,0,0)
         self.boy = {'idle':sprIdle,'walk':sprWalk,'run':sprRun,'punch1':sprPunch1,
                     'punch2':sprPunch2,'kick':sprKick,'datk':sprDatk,'jump':sprJump,
                     'land':sprLand,'akick':sprAkick,'throw':sprThrow,'guard':sprGuard,
@@ -399,6 +400,7 @@ class Character(Ally):
             self.akickAnim = 0
             self.throwAnim = 0
             self.guardAnim = 0
+            self.xSpeed = 0
         if self.hp <= 0:
             if self.dead == 0:
                 self.dead = 1
@@ -410,7 +412,8 @@ class Character(Ally):
                     self.deathAnim -= 1
                 if self.deathAnim == 0:
                     self.boy['death'].index = 80
-                    print(self.sprite.index)
+                if self.deathAnim == 8:
+                    self.shadow.setSprite(self.sprShadowLoss)
                 self.setSprite(self.boy['death'])
         self.move(self.xSpeed*self.runModifier,self.ySpeed*self.runModifier)
         self.z += self.ySpeed*self.runModifier

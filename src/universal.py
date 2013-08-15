@@ -20,6 +20,7 @@ class Hitbox(pygmi.Object):
         self.countdown = 0
         self.owner = owner
         self.type = None
+        self.z_radius = 0
         if isinstance(self.owner, Ally):
             self.enemyList = []
         if isinstance(self.owner, Enemy):
@@ -42,34 +43,41 @@ class Hitbox(pygmi.Object):
             self.countdown = 8
             self.power = 1
             self.type = 'uni'
+            self.z_radius = 8
         if self.hitbox == "boy_punch2":
             self.setSprite(self.htbxBoy['punch2'])
             self.countdown = 8
             self.power = 1
             self.type = 'uni'
+            self.z_radius = 8
         if self.hitbox == "boy_kick":
             self.setSprite(self.htbxBoy['kick'])
             self.countdown = 8
             self.power = 5
             self.type = 'uni'
+            self.z_radius = 8
         if self.hitbox == "boy_datk":
             self.setSprite(self.htbxBoy['datk'])
             self.countdown = 21
             self.power = 5
             self.type = 'uni'
+            self.z_radius = 8
         if self.hitbox == 'boy_akick':
             self.setSprite(self.htbxBoy['akick'])
             self.countdown = 10
             self.power = 8
             self.type = 'uni'
+            self.z_radius = 8
         if self.hitbox == 'apathol_atk':
             self.setSprite(htbxApatholAtk)
             self.countdown = 28
             self.power = 1
             self.type = 'bi'
+            self.z_radius = 12
 
     def event_collision(self,other):
-        if isinstance(other, Enemy) and isinstance(self.owner, Ally) and other.dead == 0:
+        if (isinstance(other, Enemy) and isinstance(self.owner, Ally) and other.dead == 0
+                and other.z <= self.owner.z+self.z_radius and other.z >= self.owner.z-self.z_radius):
             if other not in self.enemyList:
                 self.enemyList.append(other)
                 other.recoilAnim = other.recoilTime
@@ -81,7 +89,8 @@ class Hitbox(pygmi.Object):
                         other.recoilSide = -1
                 other.recoilCounter = 4
                 other.recoilDistance = self.power/other.weight
-        if isinstance(other, Ally) and isinstance(self.owner, Enemy) and other.dead == 0:
+        if (isinstance(other, Ally) and isinstance(self.owner, Enemy) and other.dead == 0
+                and other.z <= self.owner.z+self.z_radius and other.z >= self.owner.z-self.z_radius):
             if other not in self.allyList:
                 if other.guarding == 0:
                     self.allyList.append(other)
@@ -99,6 +108,7 @@ class Hitbox(pygmi.Object):
                             other.recoilSide = -1
                     other.recoilCounter = 4
                     other.recoilDistance = self.power/other.weight
+                    print('sup')
 
     def update(self):
         if self.hitbox == "boy_datk":
