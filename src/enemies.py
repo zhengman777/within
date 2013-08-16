@@ -5,7 +5,8 @@ from enemy import Enemy
 class Apathol(Enemy):
 
     def __init__(self,x,y,shadow):
-        self.hp = 3
+        self.hp = 10
+        self.power = 3
         self.timer = 100
         self.recoilTime = 12
         self.spawnTime = 24

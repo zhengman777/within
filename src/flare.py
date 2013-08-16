@@ -17,7 +17,10 @@ class Flare(Hitbox):
         self.sprFlare = pygmi.Sprite(self.assets.images["fx"]["flare.png"],22,10,0,0)
         self.setSprite(self.sprFlare)
         self.setFlipped(self.flip,0)
-        self.power = 3
+        self.force = 3
+        self.power_ratio = .3
+        self.type = "uni"
+        self.z_radius = 8
         self.countdown = 80
 
     def event_collision(self,other):

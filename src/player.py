@@ -14,11 +14,12 @@ class Character(Ally):
         self.ySpeed = 0
         self.x_scale = 1
         self.weight = 1
+        self.power = 3
         self.hp = 25
         self.maxHP = 30
-        self.wp = 25
-        self.maxWP = 30
-        self.wpRegen = .01
+        self.wp = 15
+        self.maxWP = 20
+        self.wpRegen = .0005*self.maxWP
         self.emp = 30
         self.maxEMP = 30
         self.ally = None
@@ -174,10 +175,10 @@ class Character(Ally):
             if key == K_k:
                 if self.y == self.z:
                     if self.moving == 0:
-                        if self.attacking == 0 and self.wp >= 5:
+                        if self.attacking == 0 and self.wp >= 3:
                             self.boy['throw'].index = 0
                             self.throwAnim = 20
-                            self.wp -= 5
+                            self.wp -= 3
             if key == K_LSHIFT:
                 if self.y == self.z and self.moving == 0 and self.attacking == 0:
                     self.boy['guard'].index = 0
