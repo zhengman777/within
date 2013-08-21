@@ -17,7 +17,7 @@ class Hitbox(pygmi.Object):
     def __init__(self,x,y,hitbox,owner):
         self.hitbox = hitbox
         self.force = 0
-        self.power_ratio = 0
+        self.powerRatio = 0
         self.countdown = 0
         self.owner = owner
         self.type = None
@@ -43,42 +43,42 @@ class Hitbox(pygmi.Object):
             self.setSprite(self.htbxBoy['punch1'])
             self.countdown = 8
             self.force = 1
-            self.power_ratio = 1
+            self.powerRatio = 1
             self.type = 'uni'
             self.z_radius = 8
         if self.hitbox == "boy_punch2":
             self.setSprite(self.htbxBoy['punch2'])
             self.countdown = 8
             self.force = 1
-            self.power_ratio = 1
+            self.powerRatio = 1
             self.type = 'uni'
             self.z_radius = 8
         if self.hitbox == "boy_kick":
             self.setSprite(self.htbxBoy['kick'])
             self.countdown = 8
             self.force = 5
-            self.power_ratio = 1.2
+            self.powerRatio = 1.2
             self.type = 'uni'
             self.z_radius = 8
         if self.hitbox == "boy_datk":
             self.setSprite(self.htbxBoy['datk'])
             self.countdown = 21
             self.force = 5
-            self.power_ratio = 1
+            self.powerRatio = 1
             self.type = 'uni'
             self.z_radius = 8
         if self.hitbox == 'boy_akick':
             self.setSprite(self.htbxBoy['akick'])
             self.countdown = 10
             self.force = 8
-            self.power_ratio = .7
+            self.powerRatio = .7
             self.type = 'uni'
             self.z_radius = 8
         if self.hitbox == 'apathol_atk':
             self.setSprite(htbxApatholAtk)
             self.countdown = 28
             self.force = 1
-            self.power_ratio = 1
+            self.powerRatio = 1
             self.type = 'bi'
             self.z_radius = 12
 
@@ -88,7 +88,7 @@ class Hitbox(pygmi.Object):
             if other not in self.enemyList:
                 self.enemyList.append(other)
                 other.recoilAnim = other.recoilTime
-                other.hp -= owner.power*self.power_ratio
+                other.hp -= owner.power*self.powerRatio
                 if self.type == 'uni':
                     if self._flipped_x == 0:
                         other.recoilSide = 1
@@ -107,7 +107,7 @@ class Hitbox(pygmi.Object):
                 if other.guarding == 0:
                     self.allyList.append(other)
                     other.recoilAnim = other.recoilTime
-                    other.hp -= owner.power*self.power_ratio
+                    other.hp -= owner.power*self.powerRatio
                     if self.type == 'uni':
                         if self._flipped_x == 0:
                             other.recoilSide = 1
